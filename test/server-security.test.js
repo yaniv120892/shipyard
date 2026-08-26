@@ -38,6 +38,7 @@ function stubEngine() {
     dir,
     getSnapshot: () => ({ flows: [], health: {}, scannedAt: 1, setup: {} }),
     flowDetail: () => null,
+    refreshDiscovery: async () => {},
     refreshNetwork: async () => {},
     docPath: (flow, rel) => (rel === 'plan.md' ? path.join(dir, 'plan.md') : null),
     openTarget: () => null,

@@ -48,6 +48,16 @@ test('read returns state, docs, and birth from first timestamped entry', () => {
   assert.equal(out.broken, false);
 });
 
+test('doc rel paths point under .claude/ship/, not the bare name (H1)', () => {
+  const ship = makeShipDir({ slug: 's', branch: 'feat/s', phase: 'plan', history: [] });
+  fs.writeFileSync(path.join(ship, 'plan.md'), '# plan');
+  fs.writeFileSync(path.join(ship, 'reports', 'scout.md'), 'r');
+  const out = createShipCollector().read(ship);
+  const byName = Object.fromEntries(out.docs.map((d) => [d.name, d.rel]));
+  assert.equal(byName['plan.md'], '.claude/ship/plan.md');
+  assert.equal(byName['reports/scout.md'], '.claude/ship/reports/scout.md');
+});
+
 test('torn writes serve last-known-good; broken only after 3 straight failures', () => {
   const collector = createShipCollector();
   const ship = makeShipDir({ slug: 's', branch: 'b', phase: 'qa', history: [] });

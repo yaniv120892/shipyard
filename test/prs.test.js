@@ -20,6 +20,15 @@ test('authStatus gates on gh availability', async () => {
   assert.equal((await bad.authStatus()).ok, false);
 });
 
+test('authStatus reports "gh not installed" when the binary is missing (M1)', async () => {
+  const enoent = new Error('spawn gh ENOENT');
+  enoent.code = 'ENOENT';
+  const gh = createGhClient({ execFileP: async () => Promise.reject(enoent) });
+  const out = await gh.authStatus();
+  assert.equal(out.ok, false);
+  assert.equal(out.reason, 'gh not installed');
+});
+
 test('listOpenPrs parses gh json', async () => {
   const gh = createGhClient({
     execFileP: stubExec({
