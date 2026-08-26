@@ -8,6 +8,16 @@ what needs attention — needs you, active, failing, not started, stale,
 shipped — so you can see at a glance what to look at next, with the plan,
 scope, proof-of-work, PR, and Linear task of any flow one click away.
 
+## What it looks like
+
+![Board grouped by attention, light theme](docs/screenshots/board-light.png)
+The board, grouped into needs you / failing / active / not started / stale / shipped.
+
+![Flow drawer open over the board](docs/screenshots/drawer.png)
+A flow's drawer: status, original request, and timeline/plan/scope/proof/PR/git tabs.
+
+Also: [dark](docs/screenshots/board-dark.png) · [narrow window](docs/screenshots/narrow.png).
+
 It's a single Node process with no database and no build step: the
 filesystem is the persistence, and `public/index.html` is a plain HTML/JS
 page served straight off disk.

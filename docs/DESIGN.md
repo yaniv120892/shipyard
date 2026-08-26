@@ -18,7 +18,7 @@ original proposal. Product decisions and their rationale live in
 | Non-/ship flows | Ambient detection from existing signals; no opt-in registration                                |
 | Runtime         | Local machine only; remote claude.ai/code sessions → YAN-61                                    |
 | Tracker         | Linear (workspace `yaniv-daye-personal`) behind a swappable provider interface                 |
-| UI              | Local web app; card grid grouped by attention (mockup Option B)                                |
+| UI              | Local web app; card grid grouped by attention (visual identity captured in docs/screenshots)   |
 | Actions         | Open-helpers only (docs, editor, PR/Linear links, copy commands); richer actions → YAN-62      |
 | History         | Archive ship-run state so it survives post-merge worktree deletion                             |
 | Timestamps      | `/ship` history entries gain `{phase, at, note?}` — small PR to claude-config                  |
@@ -275,7 +275,9 @@ Never blocks rendering.
 
 ## UI
 
-Card grid per the approved mockup (Option B), with the review fixes:
+Card grid grouped by attention, with the review fixes below; the visual
+identity is captured by the screenshots in docs/screenshots (see also the
+README).
 
 **Grouping & precedence.** Sections: Needs you → Failing → Active → Not
 started → Stale → Recently shipped. A flow belongs to exactly one, by hard
