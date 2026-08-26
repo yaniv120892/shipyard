@@ -1,17 +1,67 @@
 #!/usr/bin/env node
-import { readFileSync } from 'node:fs';
-import { fileURLToPath } from 'node:url';
+import fs from 'node:fs';
+import os from 'node:os';
 import path from 'node:path';
-import crypto from 'node:crypto';
+import { execFile } from 'node:child_process';
+import { loadConfig } from '../lib/config.js';
+import { createEngine } from '../lib/engine.js';
 import { createServer, startServer } from '../server.js';
+import { createToken } from '../lib/security.js';
+import { buildDemoEngine } from '../scripts/demo.js';
 
-const __dirname = path.dirname(fileURLToPath(import.meta.url));
-const pkg = JSON.parse(readFileSync(path.join(__dirname, '..', 'package.json'), 'utf8'));
+const args = process.argv.slice(2);
+const demo = args.includes('--demo');
+const portFlag = args.includes('--port') ? Number(args[args.indexOf('--port') + 1]) : null;
+const { config, created, missingRoots } = loadConfig({});
+const port = portFlag ?? config.port;
 
-const token = crypto.randomBytes(24).toString('hex');
-const requestedPort = Number(process.env.PORT) || 0;
+async function existingInstance(port) {
+  try {
+    const res = await fetch(`http://127.0.0.1:${port}/api/health`, {
+      signal: AbortSignal.timeout(1000),
+    });
+    const body = await res.json();
+    return body.name === 'shipyard';
+  } catch {
+    return false;
+  }
+}
 
-const server = createServer({ token, version: pkg.version, engine: null, config: {} });
-const port = await startServer(server, requestedPort);
+function openBrowser(url) {
+  const cmd = process.platform === 'darwin' ? 'open' : 'xdg-open';
+  execFile(cmd, [url], () => {});
+}
 
-console.log(`shipyard v${pkg.version} listening on http://127.0.0.1:${port}`);
+if (await existingInstance(port)) {
+  console.log(`shipyard already running at http://127.0.0.1:${port} — opening it`);
+  openBrowser(`http://127.0.0.1:${port}`);
+  process.exit(0);
+}
+
+const token = createToken();
+const engine = demo
+  ? buildDemoEngine()
+  : createEngine({ config, setup: { created, missingRoots, roots: config.roots } });
+const server = createServer({ token, version: '0.1.0', engine, config });
+let bound;
+try {
+  bound = await startServer(server, port);
+} catch {
+  bound = await startServer(server, 0);
+} // port taken by something else
+engine.start();
+// Archiver pidfile: snapshots are idempotent, so a second writer is wasteful, not
+// corrupting — record who owns archiving and clean up on exit.
+const pidFile = path.join(os.homedir(), '.claude', 'shipyard', 'archiver.pid');
+fs.mkdirSync(path.dirname(pidFile), { recursive: true });
+fs.writeFileSync(pidFile, String(process.pid));
+process.on('exit', () => {
+  try {
+    fs.rmSync(pidFile);
+  } catch {}
+});
+const url = `http://127.0.0.1:${bound}`;
+console.log(`shipyard: ${url}`);
+if (demo) console.log('demo mode — showing fixture data, nothing on disk is scanned');
+if (created && !demo) console.log('first run — confirm scan roots in the setup panel');
+openBrowser(url);
