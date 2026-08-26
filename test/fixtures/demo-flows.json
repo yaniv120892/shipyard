@@ -1,0 +1,530 @@
+[
+  {
+    "id": "81d3e27282736eaa",
+    "kind": "ship",
+    "title": "fix-login-redirect",
+    "repo": { "key": "github.com/acme/finance-app", "name": "finance-app" },
+    "branch": "fix/login-redirect",
+    "group": "needsYou",
+    "action": "merge",
+    "statusLine": "ready to merge",
+    "waitingSince": 1787717237474,
+    "lastActivityMs": 1787717237474,
+    "sources": ["ship", "pr"],
+    "broken": false,
+    "sameTicketAs": null,
+    "state": {
+      "slug": "fix-login-redirect",
+      "branch": "fix/login-redirect",
+      "phase": "ready-to-merge",
+      "pr": 142,
+      "request": "The login redirect sends users to /dashboard even when they came from a deep link like /reports/q3. Fix it so the post-login redirect returns to the originally requested URL, and add a regression test.",
+      "history": [
+        {
+          "phase": "scope",
+          "at": "2026-08-25T23:35:17.474Z",
+          "note": "reproduced: redirect always targets /dashboard, deep-link target is dropped"
+        },
+        {
+          "phase": "plan",
+          "at": "2026-08-26T00:35:17.474Z",
+          "note": "store return-to in session before auth redirect"
+        },
+        {
+          "phase": "implement",
+          "at": "2026-08-26T02:35:17.474Z",
+          "note": "return-to captured and honored on callback"
+        },
+        { "phase": "polish", "at": "2026-08-26T03:35:17.474Z", "note": "lint + types clean" },
+        {
+          "phase": "qa",
+          "at": "2026-08-26T04:03:17.474Z",
+          "note": "QA passed: 3 new tests, full suite green"
+        }
+      ]
+    },
+    "timeline": [
+      {
+        "phase": "scope",
+        "at": "2026-08-25T23:35:17.474Z",
+        "note": "reproduced: redirect always targets /dashboard, deep-link target is dropped"
+      },
+      {
+        "phase": "plan",
+        "at": "2026-08-26T00:35:17.474Z",
+        "note": "store return-to in session before auth redirect"
+      },
+      {
+        "phase": "implement",
+        "at": "2026-08-26T02:35:17.474Z",
+        "note": "return-to captured and honored on callback"
+      },
+      { "phase": "polish", "at": "2026-08-26T03:35:17.474Z", "note": "lint + types clean" },
+      {
+        "phase": "qa",
+        "at": "2026-08-26T04:03:17.474Z",
+        "note": "QA passed: 3 new tests, full suite green"
+      }
+    ],
+    "docs": [
+      {
+        "name": "scope.md",
+        "rel": "scope.md",
+        "mtimeMs": 1787700917474,
+        "content": "# Scope\n\n**Bug:** the post-login redirect always lands on `/dashboard`, dropping the\noriginally requested deep link (e.g. `/reports/q3`).\n\n- Reproduced on staging: sign out, hit a deep link, sign back in\n- No `return_to` is captured anywhere in the auth flow today\n- Fix is contained to the auth callback + one session field\n\nSee the [auth flow diagram](https://example.com/auth-flow) for context."
+      },
+      {
+        "name": "plan.md",
+        "rel": "plan.md",
+        "mtimeMs": 1787704517474,
+        "content": "# Plan\n\n1. Capture the requested URL into `session.returnTo` before the auth redirect\n2. On the callback, read `session.returnTo` and redirect there instead of `/dashboard`\n3. Fall back to `/dashboard` when `returnTo` is absent or unsafe\n\nTouches `lib/auth/callback.js` only. Use `new URL(returnTo, origin)` to reject\nabsolute off-site targets before redirecting."
+      },
+      {
+        "name": "proof-of-work.md",
+        "rel": "proof-of-work.md",
+        "mtimeMs": 1787716997474,
+        "content": "# Proof of work\n\n**Result: all green.**\n\n- `session.returnTo` is set in `startAuth()` and read in `handleCallback()`\n- Off-site targets are rejected with `new URL(returnTo, origin).origin === origin`\n- 3 new tests cover: deep link honored, no return-to falls back, off-site target rejected\n\n```js\nconst target = safeReturnTo(session.returnTo, req.headers.origin);\nres.redirect(target ?? '/dashboard');\n```\n\nFull suite: `142 passed, 0 failed`. See [PR #142](https://github.com/acme/finance-app/pull/142)\nfor the diff."
+      },
+      {
+        "name": "reports/qa.md",
+        "rel": "reports/qa.md",
+        "mtimeMs": 1787716997474,
+        "content": "# QA report\n\nRan full suite plus the 3 new regression tests. All green, no flakes across\n3 runs."
+      }
+    ],
+    "worktree": "/home/user/dev/finance-app-wt/fix-login-redirect",
+    "git": {
+      "dirtyFiles": 0,
+      "lastCommitSubject": "test: cover deep-link redirect regression",
+      "lastCommitTs": 1787716997474,
+      "ahead": 4,
+      "behind": 0,
+      "pending": false,
+      "path": "/home/user/dev/finance-app-wt/fix-login-redirect",
+      "commits": [
+        {
+          "sha": "a1c9e02",
+          "subject": "test: cover deep-link redirect regression",
+          "at": "2026-08-26T04:03:17.474Z"
+        },
+        {
+          "sha": "77fbd41",
+          "subject": "fix: honor return-to on auth callback",
+          "at": "2026-08-26T02:35:17.474Z"
+        }
+      ]
+    },
+    "pr": {
+      "number": 142,
+      "title": "Fix login redirect dropping deep-link target",
+      "url": "https://github.com/acme/finance-app/pull/142",
+      "headRefName": "fix/login-redirect",
+      "isDraft": false,
+      "repoKey": "github.com/acme/finance-app",
+      "repoPath": "/home/user/dev/finance-app",
+      "repoName": "finance-app",
+      "detail": {
+        "state": "OPEN",
+        "url": "https://github.com/acme/finance-app/pull/142",
+        "isDraft": false,
+        "reviewDecision": "APPROVED",
+        "checks": { "pass": 5, "fail": 0, "pending": 0 },
+        "fetchedAt": 1787718827474
+      }
+    },
+    "task": null,
+    "session": null
+  },
+  {
+    "id": "976b735ee8d69fde",
+    "kind": "ship",
+    "title": "export-csv",
+    "repo": { "key": "github.com/acme/finance-app", "name": "finance-app" },
+    "branch": "feat/export-csv",
+    "group": "needsYou",
+    "action": "approve-plan",
+    "statusLine": "waiting: approve plan",
+    "waitingSince": 1787700617474,
+    "lastActivityMs": 1787700617474,
+    "sources": ["ship"],
+    "broken": false,
+    "sameTicketAs": null,
+    "state": {
+      "slug": "export-csv",
+      "branch": "feat/export-csv",
+      "phase": "plan",
+      "pr": null,
+      "request": "Add a \"Export CSV\" button to the transactions table that downloads the currently filtered rows, respecting the active date range and category filters.",
+      "history": [
+        {
+          "phase": "scope",
+          "at": "2026-08-25T22:35:17.474Z",
+          "note": "confirmed scope: filtered export only, no background jobs needed at current volumes"
+        },
+        {
+          "phase": "plan",
+          "at": "2026-08-25T23:25:17.474Z",
+          "note": "client-side CSV build from the already-fetched filtered rows; no new endpoint"
+        }
+      ]
+    },
+    "timeline": [
+      {
+        "phase": "scope",
+        "at": "2026-08-25T22:35:17.474Z",
+        "note": "confirmed scope: filtered export only, no background jobs needed at current volumes"
+      },
+      {
+        "phase": "plan",
+        "at": "2026-08-25T23:25:17.474Z",
+        "note": "client-side CSV build from the already-fetched filtered rows; no new endpoint"
+      }
+    ],
+    "docs": [
+      {
+        "name": "scope.md",
+        "rel": "scope.md",
+        "mtimeMs": 1787697317474,
+        "content": "# Scope\n\nExport the *currently filtered* transaction rows to CSV — date range and\ncategory filters both apply. No background job needed at current volumes\n(< 5k rows per export)."
+      },
+      {
+        "name": "plan.md",
+        "rel": "plan.md",
+        "mtimeMs": 1787700317474,
+        "content": "# Plan\n\n1. Add an **Export CSV** button next to the table filters\n2. Build the CSV client-side from the already-fetched filtered rows —\n   no new endpoint\n3. Use `Blob` + `URL.createObjectURL` for the download\n\nEstimated: small, one component + one util function."
+      }
+    ],
+    "worktree": "/home/user/dev/finance-app-wt/export-csv",
+    "git": {
+      "dirtyFiles": 0,
+      "lastCommitSubject": "chore: worktree created",
+      "lastCommitTs": 1787697317474,
+      "ahead": 0,
+      "behind": 2,
+      "pending": false,
+      "path": "/home/user/dev/finance-app-wt/export-csv",
+      "commits": [
+        { "sha": "9b04f10", "subject": "chore: worktree created", "at": "2026-08-25T22:35:17.474Z" }
+      ]
+    },
+    "pr": null,
+    "task": null,
+    "session": null
+  },
+  {
+    "id": "cce4d0d09eed708b",
+    "kind": "ship",
+    "title": "price-alerts",
+    "repo": { "key": "github.com/acme/finance-app", "name": "finance-app" },
+    "branch": "feat/price-alerts",
+    "group": "active",
+    "action": null,
+    "statusLine": "agent working: implement",
+    "waitingSince": 1787718677474,
+    "lastActivityMs": 1787718677474,
+    "sources": ["ship"],
+    "broken": false,
+    "sameTicketAs": null,
+    "state": {
+      "slug": "price-alerts",
+      "branch": "feat/price-alerts",
+      "phase": "implement",
+      "pr": null,
+      "request": "Let users set a price alert on any watched ticker (above/below threshold) and get a notification when it triggers. Reuse the existing notification pipeline.",
+      "history": [
+        {
+          "phase": "scope",
+          "at": "2026-08-26T03:45:17.474Z",
+          "note": "reuse notification pipeline; new alerts table with a nightly threshold sweep"
+        },
+        {
+          "phase": "plan",
+          "at": "2026-08-26T03:55:17.474Z",
+          "note": "alerts table + cron sweep + settings UI, in that order"
+        }
+      ]
+    },
+    "timeline": [
+      {
+        "phase": "scope",
+        "at": "2026-08-26T03:45:17.474Z",
+        "note": "reuse notification pipeline; new alerts table with a nightly threshold sweep"
+      },
+      {
+        "phase": "plan",
+        "at": "2026-08-26T03:55:17.474Z",
+        "note": "alerts table + cron sweep + settings UI, in that order"
+      }
+    ],
+    "docs": [
+      {
+        "name": "scope.md",
+        "rel": "scope.md",
+        "mtimeMs": 1787715917474,
+        "content": "# Scope\n\nPer-ticker price alerts (above/below a threshold) that reuse the existing\nnotification pipeline. A nightly sweep checks watched tickers against open\nalerts."
+      },
+      {
+        "name": "plan.md",
+        "rel": "plan.md",
+        "mtimeMs": 1787716517474,
+        "content": "# Plan\n\n1. `alerts` table: user, ticker, direction, threshold\n2. Nightly cron sweep compares latest price to open alerts\n3. Settings UI to create/delete alerts\n\nIn progress: step 1."
+      }
+    ],
+    "worktree": "/home/user/dev/finance-app-wt/price-alerts",
+    "git": {
+      "dirtyFiles": 5,
+      "lastCommitSubject": "wip: alerts table migration",
+      "lastCommitTs": 1787718677474,
+      "ahead": 2,
+      "behind": 0,
+      "pending": false,
+      "path": "/home/user/dev/finance-app-wt/price-alerts",
+      "commits": [
+        {
+          "sha": "3e881aa",
+          "subject": "wip: alerts table migration",
+          "at": "2026-08-26T04:31:17.474Z"
+        }
+      ]
+    },
+    "pr": null,
+    "task": null,
+    "session": {
+      "cwd": "/home/user/dev/finance-app-wt/price-alerts",
+      "lastActiveAt": 1787718677474
+    }
+  },
+  {
+    "id": "f828fbe425629db0",
+    "kind": "ship",
+    "title": "webhooks-retry",
+    "repo": { "key": "github.com/acme/finance-app", "name": "finance-app" },
+    "branch": "feat/webhooks-retry",
+    "group": "failing",
+    "action": null,
+    "statusLine": "run stalled mid-implement",
+    "waitingSince": 1787610917474,
+    "lastActivityMs": 1787610917474,
+    "sources": ["ship", "pr"],
+    "broken": false,
+    "sameTicketAs": null,
+    "degraded": [{ "source": "gh", "reason": "PR state unavailable (GitLab)" }],
+    "state": {
+      "slug": "webhooks-retry",
+      "branch": "feat/webhooks-retry",
+      "phase": "implement",
+      "pr": 87,
+      "request": "Outbound webhook deliveries should retry with backoff on 5xx instead of dropping silently. Cap at 5 attempts and record delivery attempts for support.",
+      "history": [
+        {
+          "phase": "scope",
+          "at": "2026-08-24T02:35:17.474Z",
+          "note": "retry table + exponential backoff, capped at 5 attempts"
+        },
+        {
+          "phase": "plan",
+          "at": "2026-08-24T03:35:17.474Z",
+          "note": "worker picks up failed deliveries from a retry queue"
+        }
+      ]
+    },
+    "timeline": [
+      {
+        "phase": "scope",
+        "at": "2026-08-24T02:35:17.474Z",
+        "note": "retry table + exponential backoff, capped at 5 attempts"
+      },
+      {
+        "phase": "plan",
+        "at": "2026-08-24T03:35:17.474Z",
+        "note": "worker picks up failed deliveries from a retry queue"
+      }
+    ],
+    "docs": [
+      {
+        "name": "scope.md",
+        "rel": "scope.md",
+        "mtimeMs": 1787538917474,
+        "content": "# Scope\n\nOutbound webhook deliveries drop silently on a 5xx. Add retry with\nexponential backoff, capped at 5 attempts, and record each attempt for\nsupport lookups."
+      },
+      {
+        "name": "plan.md",
+        "rel": "plan.md",
+        "mtimeMs": 1787542517474,
+        "content": "# Plan\n\n1. `webhook_deliveries` table logs every attempt\n2. Failed deliveries enqueue a retry job with backoff `2^n` minutes\n3. Worker picks up due retries, caps at 5 attempts total\n\nStalled mid-implement — worker skeleton only, no retry logic yet."
+      }
+    ],
+    "worktree": "/home/user/dev/finance-app-wt/webhooks-retry",
+    "git": {
+      "dirtyFiles": 2,
+      "lastCommitSubject": "wip: retry queue skeleton",
+      "lastCommitTs": 1787610917474,
+      "ahead": 3,
+      "behind": 6,
+      "pending": false,
+      "path": "/home/user/dev/finance-app-wt/webhooks-retry",
+      "commits": [
+        {
+          "sha": "5cf2a90",
+          "subject": "wip: retry queue skeleton",
+          "at": "2026-08-24T22:35:17.474Z"
+        }
+      ]
+    },
+    "pr": {
+      "number": 87,
+      "title": "Retry webhook deliveries with backoff",
+      "url": "https://github.com/acme/finance-app/pull/87",
+      "headRefName": "feat/webhooks-retry",
+      "isDraft": true,
+      "repoKey": "github.com/acme/finance-app",
+      "repoPath": "/home/user/dev/finance-app",
+      "repoName": "finance-app",
+      "detail": null
+    },
+    "task": null,
+    "session": null
+  },
+  {
+    "id": "077e6573d500bb93",
+    "kind": "ship",
+    "title": "fix-rate-limit",
+    "repo": { "key": "github.com/acme/inventory-service", "name": "inventory-service" },
+    "branch": "fix/rate-limit",
+    "group": "failing",
+    "action": null,
+    "statusLine": "state.json unreadable — check the run",
+    "waitingSince": 1787708117474,
+    "lastActivityMs": null,
+    "sources": ["ship"],
+    "broken": true,
+    "sameTicketAs": null,
+    "state": null,
+    "timeline": [],
+    "docs": [],
+    "worktree": "/home/user/dev/inventory-service-wt/fix-rate-limit",
+    "git": null,
+    "pr": null,
+    "task": null,
+    "session": null
+  },
+  {
+    "id": "pr:github.com/acme/finance-app#98",
+    "kind": "pr",
+    "title": "chore: bump node to 22",
+    "repo": { "key": "github.com/acme/finance-app", "name": "finance-app" },
+    "branch": "chore/bump-node-22",
+    "group": "failing",
+    "action": null,
+    "statusLine": "CI failing (1)",
+    "waitingSince": 1787715017474,
+    "lastActivityMs": 1787715017474,
+    "sources": ["pr", "branch"],
+    "broken": false,
+    "sameTicketAs": null,
+    "state": null,
+    "timeline": [],
+    "docs": [],
+    "worktree": null,
+    "git": {
+      "dirtyFiles": 0,
+      "lastCommitSubject": "chore: bump node to 22",
+      "lastCommitTs": 1787715017474,
+      "ahead": 1,
+      "behind": 0,
+      "pending": false,
+      "path": null,
+      "commits": [
+        { "sha": "e40b7c1", "subject": "chore: bump node to 22", "at": "2026-08-26T03:30:17.474Z" }
+      ]
+    },
+    "pr": {
+      "number": 98,
+      "title": "chore: bump node to 22",
+      "url": "https://github.com/acme/finance-app/pull/98",
+      "headRefName": "chore/bump-node-22",
+      "isDraft": false,
+      "repoKey": "github.com/acme/finance-app",
+      "repoPath": "/home/user/dev/finance-app",
+      "repoName": "finance-app",
+      "detail": {
+        "state": "OPEN",
+        "url": "https://github.com/acme/finance-app/pull/98",
+        "isDraft": false,
+        "reviewDecision": null,
+        "checks": { "pass": 4, "fail": 1, "pending": 0 },
+        "fetchedAt": 1787718317474
+      }
+    },
+    "task": null,
+    "session": null
+  },
+  {
+    "id": "task:YAN-57",
+    "kind": "task",
+    "title": "Add price history chart",
+    "repo": { "key": null, "name": null },
+    "branch": null,
+    "group": "notStarted",
+    "action": null,
+    "statusLine": "Backlog",
+    "waitingSince": null,
+    "lastActivityMs": null,
+    "sources": ["task"],
+    "broken": false,
+    "sameTicketAs": null,
+    "state": null,
+    "timeline": [],
+    "docs": [],
+    "worktree": null,
+    "git": null,
+    "pr": null,
+    "task": {
+      "identifier": "YAN-57",
+      "title": "Add price history chart",
+      "url": "https://linear.app/acme/issue/YAN-57",
+      "branchName": null,
+      "state": "Backlog",
+      "stateType": "backlog"
+    },
+    "session": null
+  },
+  {
+    "id": "branch:github.com/acme/finance-app#spike/webhooks",
+    "kind": "branch",
+    "title": "spike/webhooks",
+    "repo": { "key": "github.com/acme/finance-app", "name": "finance-app" },
+    "branch": "spike/webhooks",
+    "group": "stale",
+    "action": null,
+    "statusLine": "no recent activity",
+    "waitingSince": 1787459717474,
+    "lastActivityMs": 1787459717474,
+    "sources": ["branch"],
+    "broken": false,
+    "sameTicketAs": null,
+    "state": null,
+    "timeline": [],
+    "docs": [],
+    "worktree": "/home/user/dev/finance-app-wt/spike-webhooks",
+    "git": {
+      "dirtyFiles": 3,
+      "lastCommitSubject": "wip: prototype webhook signature check",
+      "lastCommitTs": 1787459717474,
+      "ahead": 1,
+      "behind": 11,
+      "pending": false,
+      "path": "/home/user/dev/finance-app-wt/spike-webhooks",
+      "commits": [
+        {
+          "sha": "0f1a2b3",
+          "subject": "wip: prototype webhook signature check",
+          "at": "2026-08-23T04:35:17.474Z"
+        }
+      ]
+    },
+    "pr": null,
+    "task": null,
+    "session": null
+  }
+]

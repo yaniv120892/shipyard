@@ -3,10 +3,2044 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="color-scheme" content="light dark" />
     <meta name="token" content="__TOKEN__" />
     <title>shipyard</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap"
+    />
+    <style>
+      :root {
+        --bg: #f6f7f9;
+        --surface: #ffffff;
+        --surface-2: #eef0f4;
+        --border: #d8dce3;
+        --ink: #1c2330;
+        --ink-soft: #5b6472;
+        --ink-faint: #8a92a1;
+        --accent: #0f766e;
+        --accent-soft: #e0f0ee;
+        --amber: #b45309;
+        --amber-bg: #fdf3e3;
+        --amber-border: #ecc989;
+        --green: #15803d;
+        --green-bg: #e7f3ea;
+        --red: #b91c1c;
+        --red-bg: #fbeaea;
+        --stale: #6b7280;
+        --stale-bg: #eceef1;
+        --frame-bar: #e4e7ec;
+        --shadow: 0 1px 2px rgba(16, 24, 40, 0.06), 0 1px 3px rgba(16, 24, 40, 0.08);
+      }
+      @media (prefers-color-scheme: dark) {
+        :root:not([data-theme='light']) {
+          --bg: #12161d;
+          --surface: #1a2029;
+          --surface-2: #222936;
+          --border: #323b49;
+          --ink: #e6e9ee;
+          --ink-soft: #a3adbc;
+          --ink-faint: #6f7889;
+          --accent: #2fbdae;
+          --accent-soft: #143631;
+          --amber: #e8a33d;
+          --amber-bg: #33270f;
+          --amber-border: #6b5320;
+          --green: #4ec97a;
+          --green-bg: #14301d;
+          --red: #ef6a6a;
+          --red-bg: #3a1a1a;
+          --stale: #98a1b0;
+          --stale-bg: #262d38;
+          --frame-bar: #232a35;
+          --shadow: 0 1px 2px rgba(0, 0, 0, 0.4);
+        }
+      }
+      :root[data-theme='dark'] {
+        --bg: #12161d;
+        --surface: #1a2029;
+        --surface-2: #222936;
+        --border: #323b49;
+        --ink: #e6e9ee;
+        --ink-soft: #a3adbc;
+        --ink-faint: #6f7889;
+        --accent: #2fbdae;
+        --accent-soft: #143631;
+        --amber: #e8a33d;
+        --amber-bg: #33270f;
+        --amber-border: #6b5320;
+        --green: #4ec97a;
+        --green-bg: #14301d;
+        --red: #ef6a6a;
+        --red-bg: #3a1a1a;
+        --stale: #98a1b0;
+        --stale-bg: #262d38;
+        --frame-bar: #232a35;
+        --shadow: 0 1px 2px rgba(0, 0, 0, 0.4);
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+      [hidden] {
+        display: none !important;
+      }
+      html,
+      body {
+        height: 100%;
+      }
+      body {
+        margin: 0;
+        background: var(--bg);
+        color: var(--ink);
+        font-family: 'IBM Plex Sans', 'Segoe UI', system-ui, sans-serif;
+        font-size: 15px;
+        line-height: 1.55;
+      }
+      button,
+      input,
+      textarea {
+        font-family: inherit;
+        color: inherit;
+      }
+      a {
+        color: var(--accent);
+      }
+      .shell {
+        max-width: 1360px;
+        margin: 0 auto;
+        padding: 0 20px 60px;
+      }
+
+      /* boardbar */
+      .boardbar {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        flex-wrap: wrap;
+        position: sticky;
+        top: 0;
+        z-index: 20;
+        background: var(--bg);
+        padding: 14px 0 8px;
+        border-bottom: 1px solid var(--border);
+        margin-bottom: 4px;
+      }
+      .boardbar .brand {
+        font-family: 'Archivo', sans-serif;
+        font-weight: 700;
+        font-size: 15px;
+      }
+      .boardbar .stat {
+        font-size: 12px;
+        font-weight: 600;
+        border-radius: 999px;
+        padding: 3px 11px;
+        background: var(--surface-2);
+        color: var(--ink-soft);
+        border: none;
+        cursor: pointer;
+      }
+      .boardbar .stat:hover {
+        filter: brightness(0.97);
+      }
+      .boardbar .stat.warn {
+        background: var(--amber-bg);
+        color: var(--amber);
+      }
+      .boardbar .spacer {
+        flex: 1;
+      }
+      .freshness {
+        background: none;
+        border: none;
+        color: var(--ink-faint);
+        font-size: 12px;
+        cursor: pointer;
+        padding: 2px 4px;
+      }
+      .refresh-btn {
+        font-family: 'Archivo', sans-serif;
+        font-weight: 600;
+        font-size: 12px;
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: 999px;
+        padding: 5px 13px;
+        cursor: pointer;
+      }
+      .refresh-btn:hover {
+        border-color: var(--accent);
+      }
+      .refresh-btn:disabled {
+        opacity: 0.6;
+        cursor: default;
+      }
+
+      #health-row {
+        display: flex;
+        gap: 8px;
+        align-items: center;
+        padding: 6px 2px 14px;
+        font-size: 12px;
+        flex-wrap: wrap;
+      }
+      .health-item {
+        border: none;
+        background: var(--surface-2);
+        border-radius: 999px;
+        padding: 2px 10px;
+        font-family: 'IBM Plex Mono', monospace;
+        cursor: default;
+        color: var(--ink-soft);
+      }
+      .health-item.fail {
+        background: var(--red-bg);
+        color: var(--red);
+      }
+      .health-item.ok {
+        color: var(--green);
+      }
+      .sep {
+        color: var(--ink-faint);
+      }
+
+      /* chips */
+      .chip {
+        display: inline-flex;
+        align-items: center;
+        gap: 4px;
+        font-size: 11px;
+        font-weight: 600;
+        letter-spacing: 0.04em;
+        border-radius: 5px;
+        padding: 1px 7px;
+        text-transform: uppercase;
+      }
+      .chip.src {
+        background: var(--surface-2);
+        color: var(--ink-soft);
+      }
+      .chip.ship {
+        background: var(--accent-soft);
+        color: var(--accent);
+      }
+      .chip.needs {
+        background: var(--amber-bg);
+        color: var(--amber);
+        border: 1px solid var(--amber-border);
+      }
+      .chip.ok {
+        background: var(--green-bg);
+        color: var(--green);
+      }
+      .chip.fail {
+        background: var(--red-bg);
+        color: var(--red);
+      }
+      .chip.stale {
+        background: var(--stale-bg);
+        color: var(--stale);
+      }
+      .chip.more {
+        cursor: default;
+      }
+
+      /* cards */
+      .card {
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: 9px;
+        padding: 10px 12px;
+        box-shadow: var(--shadow);
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+        cursor: pointer;
+      }
+      .card.needs-you {
+        border-color: var(--amber-border);
+        box-shadow:
+          0 0 0 1px var(--amber-border),
+          var(--shadow);
+      }
+      .card.is-failing {
+        border-color: var(--red);
+        box-shadow:
+          0 0 0 1px var(--red),
+          var(--shadow);
+      }
+      .card.moved {
+        animation: moveglow 1.5s ease-out;
+      }
+      @keyframes moveglow {
+        from {
+          box-shadow:
+            0 0 0 2px var(--accent),
+            var(--shadow);
+        }
+        to {
+          box-shadow: var(--shadow);
+        }
+      }
+      .card .title {
+        font-weight: 600;
+        font-size: 14px;
+        line-height: 1.3;
+      }
+      .card .meta {
+        font-family: 'IBM Plex Mono', monospace;
+        font-size: 11.5px;
+        color: var(--ink-faint);
+      }
+      .card .row {
+        display: flex;
+        gap: 6px;
+        flex-wrap: wrap;
+        align-items: center;
+      }
+      .card .foot {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 8px;
+      }
+      .card .age {
+        font-size: 11.5px;
+      }
+      .card .links {
+        display: flex;
+        gap: 10px;
+        flex-wrap: wrap;
+      }
+      .age-grey {
+        color: var(--ink-faint);
+      }
+      .age-amber {
+        color: var(--amber);
+        font-weight: 600;
+      }
+      .age-red {
+        color: var(--red);
+        font-weight: 700;
+      }
+      .age-unknown {
+        color: var(--ink-faint);
+        font-style: italic;
+      }
+
+      .linklike {
+        font-size: 11.5px;
+        font-weight: 600;
+        color: var(--accent);
+        background: none;
+        border: none;
+        padding: 0;
+        cursor: pointer;
+        text-decoration: none;
+        font-family: inherit;
+      }
+      .linklike:hover {
+        text-decoration: underline;
+      }
+      .copy-btn.copied {
+        color: var(--green);
+      }
+
+      /* pipeline strip */
+      .pipe {
+        display: flex;
+        gap: 4px;
+        align-items: center;
+        flex-wrap: wrap;
+      }
+      .pipe i {
+        width: 14px;
+        height: 5px;
+        border-radius: 3px;
+        background: var(--surface-2);
+        border: 1px solid var(--border);
+        font-style: normal;
+      }
+      .pipe i.done {
+        background: var(--accent);
+        border-color: var(--accent);
+      }
+      .pipe i.now {
+        background: var(--amber);
+        border-color: var(--amber);
+        outline: 2px solid var(--amber);
+        outline-offset: 1px;
+      }
+      .pipe i.now.fail {
+        background: var(--red);
+        border-color: var(--red);
+        outline-color: var(--red);
+      }
+      .pipe-label {
+        font-size: 11px;
+        color: var(--ink-soft);
+        margin-left: 4px;
+      }
+
+      /* sections / grid */
+      .bsection h3 {
+        font-family: 'Archivo', sans-serif;
+        font-size: 12.5px;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.06em;
+        color: var(--ink-soft);
+        margin: 18px 2px 8px;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+      }
+      .bsection h3.warn {
+        color: var(--amber);
+      }
+      .bsection h3 .count {
+        color: var(--ink-faint);
+        font-weight: 500;
+        text-transform: none;
+        letter-spacing: 0;
+      }
+      .show-all-btn {
+        margin-left: auto;
+        font-size: 11px;
+      }
+      .grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+        gap: 10px;
+      }
+      .hidden-collapsed {
+        display: none;
+      }
+
+      .thin-row {
+        grid-column: 1 / -1;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        padding: 7px 12px;
+        border: 1px solid var(--border);
+        border-radius: 7px;
+        background: var(--surface);
+        cursor: pointer;
+        font-size: 13px;
+      }
+      .thin-row .thin-title {
+        font-weight: 600;
+        flex: 1;
+        min-width: 0;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+      }
+      .thin-row .thin-meta {
+        color: var(--ink-faint);
+        font-family: 'IBM Plex Mono', monospace;
+        font-size: 11.5px;
+      }
+      .thin-row .thin-age {
+        color: var(--ink-faint);
+        font-size: 11.5px;
+        min-width: 4.5em;
+        text-align: right;
+      }
+
+      /* focus */
+      .card:focus-visible,
+      .thin-row:focus-visible,
+      .linklike:focus-visible,
+      button:focus-visible,
+      a:focus-visible,
+      input:focus-visible,
+      textarea:focus-visible,
+      .drawer-tab:focus-visible {
+        outline: 2px solid var(--accent);
+        outline-offset: 2px;
+      }
+
+      /* empty state */
+      #empty-state {
+        text-align: center;
+        color: var(--ink-soft);
+        padding: 70px 20px;
+      }
+
+      /* setup panel */
+      #setup {
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: 10px;
+        padding: 16px 18px;
+        margin: 14px 0;
+        box-shadow: var(--shadow);
+      }
+      #setup h2 {
+        font-family: 'Archivo', sans-serif;
+        font-size: 15px;
+        margin: 0 0 10px;
+      }
+      #setup label {
+        display: block;
+        font-size: 12.5px;
+        color: var(--ink-soft);
+        margin-bottom: 12px;
+      }
+      #setup textarea,
+      #setup input[type='text'] {
+        display: block;
+        width: 100%;
+        margin-top: 4px;
+        font-family: 'IBM Plex Mono', monospace;
+        font-size: 13px;
+        padding: 8px;
+        border: 1px solid var(--border);
+        border-radius: 6px;
+        background: var(--surface-2);
+        color: var(--ink);
+      }
+      .setup-banner .banner-line {
+        background: var(--red-bg);
+        color: var(--red);
+        border: 1px solid var(--red);
+        border-radius: 6px;
+        padding: 6px 10px;
+        margin-bottom: 8px;
+        font-size: 12.5px;
+      }
+      .setup-actions {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+      }
+      .setup-actions button {
+        font-family: 'Archivo', sans-serif;
+        font-weight: 600;
+        font-size: 13px;
+        background: var(--accent);
+        color: #fff;
+        border: none;
+        border-radius: 7px;
+        padding: 7px 16px;
+        cursor: pointer;
+      }
+      #setup-status {
+        font-size: 12.5px;
+        color: var(--ink-soft);
+      }
+
+      /* drawer */
+      #drawer {
+        position: fixed;
+        inset: 0;
+        z-index: 50;
+      }
+      .drawer-scrim {
+        position: absolute;
+        inset: 0;
+        background: rgba(10, 14, 20, 0.4);
+      }
+      .drawer-panel {
+        position: absolute;
+        top: 0;
+        right: 0;
+        height: 100%;
+        width: min(480px, 100%);
+        background: var(--surface);
+        border-left: 1px solid var(--border);
+        box-shadow: var(--shadow);
+        display: flex;
+        flex-direction: column;
+        overflow: hidden;
+      }
+      .drawer-head {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        padding: 12px 14px;
+        border-bottom: 1px solid var(--border);
+      }
+      .drawer-back {
+        display: none;
+        background: none;
+        border: none;
+        font-weight: 600;
+        font-size: 13px;
+        cursor: pointer;
+        color: var(--ink-soft);
+        padding: 4px 2px;
+      }
+      .drawer-title {
+        font-family: 'Archivo', sans-serif;
+        font-weight: 600;
+        font-size: 15px;
+        flex: 1;
+        min-width: 0;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+      }
+      .drawer-close {
+        background: none;
+        border: none;
+        font-size: 16px;
+        cursor: pointer;
+        color: var(--ink-soft);
+        padding: 4px 6px;
+        border-radius: 6px;
+      }
+      .drawer-close:hover {
+        background: var(--surface-2);
+      }
+      .drawer-notice {
+        margin: 10px 14px 0;
+        padding: 6px 10px;
+        background: var(--amber-bg);
+        color: var(--amber);
+        border: 1px solid var(--amber-border);
+        border-radius: 6px;
+        font-size: 12.5px;
+        cursor: pointer;
+      }
+      .drawer-status {
+        padding: 10px 14px;
+        border-bottom: 1px solid var(--border);
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+      }
+      .drawer-status .meta {
+        font-family: 'IBM Plex Mono', monospace;
+        font-size: 11.5px;
+        color: var(--ink-faint);
+      }
+      .drawer-tabs {
+        display: flex;
+        gap: 2px;
+        padding: 6px 10px;
+        border-bottom: 1px solid var(--border);
+        overflow-x: auto;
+      }
+      .drawer-tab {
+        font-family: 'Archivo', sans-serif;
+        font-size: 12px;
+        font-weight: 600;
+        padding: 5px 10px;
+        border-radius: 6px;
+        border: 1px solid transparent;
+        background: none;
+        color: var(--ink-soft);
+        cursor: pointer;
+        white-space: nowrap;
+      }
+      .drawer-tab.active {
+        background: var(--accent-soft);
+        color: var(--accent);
+        border-color: var(--accent);
+      }
+      .drawer-body {
+        padding: 14px;
+        overflow-y: auto;
+        flex: 1;
+      }
+      .drawer-body h1,
+      .drawer-body h2,
+      .drawer-body h3,
+      .drawer-body h4 {
+        font-family: 'Archivo', sans-serif;
+        margin: 14px 0 6px;
+      }
+      .drawer-body h1:first-child,
+      .drawer-body h2:first-child,
+      .drawer-body h3:first-child {
+        margin-top: 0;
+      }
+      .drawer-body p {
+        margin: 6px 0;
+      }
+      .drawer-body ul,
+      .drawer-body ol {
+        margin: 6px 0;
+        padding-left: 22px;
+      }
+      .drawer-body pre {
+        background: var(--surface-2);
+        padding: 10px;
+        border-radius: 8px;
+        overflow-x: auto;
+        font-size: 12.5px;
+      }
+      .drawer-body code {
+        font-family: 'IBM Plex Mono', monospace;
+        background: var(--surface-2);
+        padding: 1px 4px;
+        border-radius: 4px;
+        font-size: 0.92em;
+      }
+      .drawer-body pre code {
+        background: none;
+        padding: 0;
+      }
+      .muted {
+        color: var(--ink-faint);
+      }
+      .notice.error {
+        background: var(--red-bg);
+        color: var(--red);
+        border: 1px solid var(--red);
+        border-radius: 8px;
+        padding: 8px 10px;
+        font-size: 13px;
+        margin-bottom: 8px;
+      }
+      .status-dl {
+        display: grid;
+        grid-template-columns: auto 1fr;
+        gap: 5px 12px;
+        margin: 0 0 10px;
+      }
+      .status-dl dt {
+        color: var(--ink-faint);
+        font-size: 11px;
+        text-transform: uppercase;
+        letter-spacing: 0.04em;
+      }
+      .status-dl dd {
+        margin: 0;
+      }
+      .request-text {
+        white-space: pre-wrap;
+        font-family: 'IBM Plex Mono', monospace;
+        font-size: 13px;
+        background: var(--surface-2);
+        padding: 10px;
+        border-radius: 8px;
+        line-height: 1.6;
+      }
+      .timeline {
+        list-style: none;
+        margin: 0;
+        padding: 0;
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+      }
+      .timeline li {
+        border-left: 2px solid var(--border);
+        padding-left: 10px;
+      }
+      .tl-phase {
+        font-weight: 600;
+        text-transform: capitalize;
+      }
+      .tl-time {
+        color: var(--ink-faint);
+        font-size: 11.5px;
+        margin-left: 6px;
+      }
+      .tl-note {
+        margin: 4px 0 0;
+        color: var(--ink-soft);
+        font-size: 13px;
+      }
+      .tl-report {
+        display: block;
+        margin-top: 3px;
+        color: var(--ink-faint);
+        font-size: 11px;
+      }
+      .commit-list {
+        margin: 6px 0;
+        padding-left: 18px;
+      }
+      .drawer-actions {
+        display: flex;
+        gap: 14px;
+        flex-wrap: wrap;
+        margin-top: 10px;
+      }
+
+      .copy-popover {
+        position: absolute;
+        z-index: 100;
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: 8px;
+        box-shadow: var(--shadow);
+        padding: 8px;
+      }
+      .copy-popover input {
+        font-family: 'IBM Plex Mono', monospace;
+        font-size: 12px;
+        width: 280px;
+        max-width: 60vw;
+        padding: 4px 6px;
+        border: 1px solid var(--border);
+        border-radius: 4px;
+        background: var(--surface-2);
+        color: var(--ink);
+      }
+
+      @media (max-width: 700px) {
+        .drawer-panel {
+          width: 100%;
+        }
+        .drawer-back {
+          display: inline-flex;
+        }
+      }
+    </style>
   </head>
   <body>
-    <!-- UI arrives in Task 15 -->
+    <div class="shell">
+      <header class="boardbar" id="boardbar">
+        <span class="brand">⚓ shipyard</span>
+        <button type="button" class="stat" id="stat-needsYou" data-group="needsYou">
+          0 need you
+        </button>
+        <button type="button" class="stat" id="stat-failing" data-group="failing">0 failing</button>
+        <button type="button" class="stat" id="stat-active" data-group="active">0 active</button>
+        <button type="button" class="stat" id="stat-stale" data-group="stale">0 stale</button>
+        <span class="spacer"></span>
+        <button type="button" class="freshness" id="freshness" aria-expanded="false">
+          refreshed —
+        </button>
+        <button type="button" class="refresh-btn" id="refresh-btn">Refresh now</button>
+      </header>
+      <div id="health-row" hidden></div>
+
+      <div id="setup" hidden>
+        <div class="setup-banner" id="setup-banner"></div>
+        <h2>Setup</h2>
+        <label
+          >Scan roots (one per line)
+          <textarea id="setup-roots" rows="4" spellcheck="false"></textarea>
+        </label>
+        <label
+          >Tracker workspace
+          <input id="setup-workspace" type="text" spellcheck="false" />
+        </label>
+        <div class="setup-actions">
+          <button type="button" id="setup-save">Save</button>
+          <span id="setup-status"></span>
+        </div>
+      </div>
+
+      <main id="board">
+        <div id="empty-state" hidden></div>
+      </main>
+    </div>
+
+    <aside id="drawer" hidden>
+      <div class="drawer-scrim" id="drawer-scrim"></div>
+      <div class="drawer-panel" role="dialog" aria-modal="true" aria-labelledby="drawer-title">
+        <div class="drawer-head">
+          <button type="button" class="drawer-back" id="drawer-back">← Back</button>
+          <div class="drawer-title" id="drawer-title">Flow</div>
+          <button type="button" class="drawer-close" id="drawer-close" aria-label="Close">✕</button>
+        </div>
+        <div class="drawer-notice" id="drawer-notice" hidden></div>
+        <div class="drawer-status" id="drawer-status"></div>
+        <nav class="drawer-tabs" id="drawer-tabs" role="tablist"></nav>
+        <div class="drawer-body" id="drawer-body"></div>
+      </div>
+    </aside>
+
+    <script>
+      /* ---------- token / api ---------- */
+      const TOKEN = document.querySelector('meta[name=token]').content;
+      function api(p, opts = {}) {
+        return fetch(p, {
+          ...opts,
+          headers: { 'X-Shipyard-Token': TOKEN, ...(opts.headers ?? {}) },
+        });
+      }
+
+      /* ---------- constants ---------- */
+      const GROUPS = ['needsYou', 'failing', 'active', 'notStarted', 'stale', 'shipped'];
+      const GROUP_LABEL = {
+        needsYou: 'Needs you',
+        failing: 'Failing',
+        active: 'Active',
+        notStarted: 'Not started',
+        stale: 'Stale',
+        shipped: 'Recently shipped',
+      };
+      const ACTION_LABEL = {
+        'answer-questions': 'Answer questions',
+        'approve-plan': 'Approve plan',
+        merge: 'Merge',
+      };
+      const SEGMENTS = ['scope', 'plan', 'implement', 'polish', 'qa', 'merge'];
+      const PHASE_INDEX = {
+        scope: 0,
+        plan: 1,
+        'plan-approved': 1,
+        implement: 2,
+        polish: 3,
+        qa: 4,
+        'ready-to-merge': 5,
+        merged: 6,
+        verified: 6,
+      };
+      const TABS = ['status', 'request', 'timeline', 'plan', 'scope', 'proof', 'pr', 'git'];
+      const TAB_LABEL = {
+        status: 'Status',
+        request: 'Request',
+        timeline: 'Timeline',
+        plan: 'Plan',
+        scope: 'Scope',
+        proof: 'Proof',
+        pr: 'PR',
+        git: 'Git',
+      };
+      const DOC_FOR_TAB = { plan: 'plan.md', scope: 'scope.md', proof: 'proof-of-work.md' };
+
+      /* ---------- small utilities ---------- */
+      function escapeHtml(s) {
+        return String(s ?? '').replace(
+          /[&<>]/g,
+          (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;' })[c],
+        );
+      }
+
+      function fmtAge(ms, now) {
+        if (ms == null) return '—';
+        const diff = Math.max(0, now - ms);
+        const mins = Math.floor(diff / 60000);
+        if (mins < 1) return 'just now';
+        if (mins < 60) return `${mins}m ago`;
+        const hrs = Math.floor(mins / 60);
+        if (hrs < 24) return `${hrs}h ago`;
+        return `${Math.floor(hrs / 24)}d ago`;
+      }
+
+      function fmtShortAge(ms, now) {
+        if (ms == null) return null;
+        const diff = Math.max(0, now - ms);
+        const s = Math.floor(diff / 1000);
+        if (s < 60) return `${s}s`;
+        const m = Math.floor(s / 60);
+        if (m < 60) return `${m}m`;
+        const h = Math.floor(m / 60);
+        if (h < 24) return `${h}h`;
+        return `${Math.floor(h / 24)}d`;
+      }
+
+      function ageClass(ms, now) {
+        if (ms == null) return 'age-unknown';
+        const diff = now - ms;
+        if (diff >= 24 * 3600 * 1000) return 'age-red';
+        if (diff >= 4 * 3600 * 1000) return 'age-amber';
+        return 'age-grey';
+      }
+
+      function fmtTime(v) {
+        if (v == null) return '—';
+        const d = new Date(v);
+        if (isNaN(d.getTime())) return String(v);
+        return d.toLocaleString(undefined, {
+          month: 'short',
+          day: 'numeric',
+          hour: '2-digit',
+          minute: '2-digit',
+        });
+      }
+
+      function waitKey(f) {
+        return f.waitingSince == null ? Infinity : f.waitingSince;
+      }
+
+      function phaseOf(flow) {
+        return flow?.state?.phase ?? flow?.group ?? null;
+      }
+
+      function describeDegraded(d) {
+        if (/PR state/i.test(d?.reason ?? '')) return 'PR state unknown';
+        return d?.reason ?? 'degraded';
+      }
+
+      function resumeCmd(flow) {
+        return `/ship resume ${flow.branch ?? flow.title ?? ''}`;
+      }
+
+      function mergeCmd(flow) {
+        return `gh pr merge ${flow.pr?.number} --squash --delete-branch`;
+      }
+
+      /* ---------- mini markdown renderer ---------- */
+      function renderInline(s) {
+        s = escapeHtml(s);
+        s = s.replace(/`([^`]+)`/g, '<code>$1</code>');
+        s = s.replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>');
+        s = s.replace(/\[([^\]]+)\]\(([^)]+)\)/g, (m, text, href) => {
+          const safeHref = /^(https?:)?\/\//i.test(href) ? href : '#';
+          return `<a href="${escapeHtml(safeHref)}" target="_blank" rel="noopener noreferrer">${text}</a>`;
+        });
+        return s;
+      }
+
+      function renderMd(text) {
+        const lines = String(text ?? '').split('\n');
+        let html = '';
+        let i = 0;
+        let listBuf = null;
+        let paraBuf = [];
+        const flushList = () => {
+          if (listBuf) {
+            html += `<${listBuf.type}>${listBuf.items.map((it) => `<li>${renderInline(it)}</li>`).join('')}</${listBuf.type}>`;
+            listBuf = null;
+          }
+        };
+        const flushPara = () => {
+          if (paraBuf.length) {
+            html += `<p>${renderInline(paraBuf.join(' '))}</p>`;
+            paraBuf = [];
+          }
+        };
+        while (i < lines.length) {
+          const line = lines[i];
+          const fence = line.match(/^```(\w*)\s*$/);
+          if (fence) {
+            flushList();
+            flushPara();
+            const code = [];
+            i++;
+            while (i < lines.length && !/^```\s*$/.test(lines[i])) {
+              code.push(lines[i]);
+              i++;
+            }
+            html += `<pre><code>${escapeHtml(code.join('\n'))}</code></pre>`;
+            i++;
+            continue;
+          }
+          const h = line.match(/^(#{1,6})\s+(.*)$/);
+          if (h) {
+            flushList();
+            flushPara();
+            html += `<h${h[1].length}>${renderInline(h[2])}</h${h[1].length}>`;
+            i++;
+            continue;
+          }
+          const ul = line.match(/^[-*]\s+(.*)$/);
+          if (ul) {
+            flushPara();
+            if (!listBuf || listBuf.type !== 'ul') {
+              flushList();
+              listBuf = { type: 'ul', items: [] };
+            }
+            listBuf.items.push(ul[1]);
+            i++;
+            continue;
+          }
+          const ol = line.match(/^\d+\.\s+(.*)$/);
+          if (ol) {
+            flushPara();
+            if (!listBuf || listBuf.type !== 'ol') {
+              flushList();
+              listBuf = { type: 'ol', items: [] };
+            }
+            listBuf.items.push(ol[1]);
+            i++;
+            continue;
+          }
+          if (line.trim() === '') {
+            flushList();
+            flushPara();
+            i++;
+            continue;
+          }
+          paraBuf.push(line.trim());
+          i++;
+        }
+        flushList();
+        flushPara();
+        return html || '<p class="muted">(empty)</p>';
+      }
+
+      /* ---------- card content builders ---------- */
+      function buildChips(flow) {
+        // Ordered by priority: the 2-chip cap (behavior 12) must never hide the
+        // action/failure/CI/degraded status chips behavior 2 requires visible, so the
+        // plain source-kind chip (Ship/PR/Branch/…) is appended last and is the first
+        // to fall into the "+N" overflow when a card has more than two chips.
+        const chips = [];
+
+        if (flow.action) {
+          chips.push({ cls: 'chip needs', text: ACTION_LABEL[flow.action] ?? flow.action });
+        } else if (flow.group === 'failing') {
+          chips.push({ cls: 'chip fail', text: flow.statusLine || 'Failing' });
+        } else if (flow.group === 'stale') {
+          chips.push({ cls: 'chip stale', text: 'Stale' });
+        }
+
+        const checks = flow.pr?.detail?.checks;
+        if (checks) {
+          const total = checks.pass + checks.fail + checks.pending;
+          const ciCls = checks.fail > 0 ? 'chip fail' : 'chip ok';
+          let ciText = `CI ${checks.pass}/${total}`;
+          if (flow.action === 'merge' && flow.pr?.detail?.fetchedAt != null) {
+            ciText += ` · ${fmtShortAge(flow.pr.detail.fetchedAt, Date.now())}`;
+          }
+          chips.push({ cls: ciCls, text: ciText });
+        }
+
+        if (Array.isArray(flow.degraded)) {
+          for (const d of flow.degraded)
+            chips.push({ cls: 'chip stale', text: describeDegraded(d) });
+        }
+
+        if (flow.kind === 'ship') chips.push({ cls: 'chip ship', text: 'Ship' });
+        else if (flow.kind === 'pr') chips.push({ cls: 'chip src', text: 'PR' });
+        else if (flow.kind === 'branch') chips.push({ cls: 'chip src', text: 'Branch' });
+        else if (flow.kind === 'task') chips.push({ cls: 'chip src', text: 'Linear' });
+        else if (flow.kind === 'session') chips.push({ cls: 'chip src', text: 'Session' });
+        return chips;
+      }
+
+      function renderChipRow(el, chips) {
+        const visible = chips.slice(0, 2);
+        const overflow = chips.length - visible.length;
+        el.innerHTML =
+          visible.map((c) => `<span class="${c.cls}">${escapeHtml(c.text)}</span>`).join('') +
+          (overflow > 0
+            ? `<span class="chip src more" title="${escapeHtml(
+                chips
+                  .slice(2)
+                  .map((c) => c.text)
+                  .join(', '),
+              )}">+${overflow}</span>`
+            : '');
+      }
+
+      function metaLine(flow) {
+        const parts = [];
+        if (flow.repo?.name) parts.push(flow.repo.name);
+        if (flow.kind === 'task') {
+          if (flow.task?.identifier) parts.push(flow.task.identifier);
+          parts.push(flow.task?.state ?? 'backlog');
+        } else if (flow.kind === 'pr') {
+          if (flow.branch) parts.push(flow.branch);
+          if (flow.pr?.number != null) parts.push(`PR #${flow.pr.number}`);
+        } else {
+          if (flow.branch) parts.push(flow.branch);
+          if (flow.kind === 'ship' && flow.pr?.number != null) parts.push(`PR #${flow.pr.number}`);
+        }
+        return parts.join(' · ') || '—';
+      }
+
+      function renderPipe(el, flow) {
+        const phase = flow.state?.phase ?? null;
+        const idx = phase != null && phase in PHASE_INDEX ? PHASE_INDEX[phase] : -1;
+        const doneMap = {};
+        for (const t of flow.timeline ?? []) {
+          if (SEGMENTS.includes(t.phase)) doneMap[t.phase] = t.at;
+        }
+        const terminal = idx === 6;
+        const isFailing = flow.group === 'failing';
+        let html = '';
+        SEGMENTS.forEach((seg, i) => {
+          let cls = '';
+          let title = seg;
+          if (doneMap[seg]) {
+            cls = 'done';
+            title += ` — done ${fmtTime(doneMap[seg])}`;
+          } else if (i === idx && !terminal) {
+            cls = isFailing ? 'now fail' : 'now';
+            title += isFailing ? ' — stalled / failed' : ' — in progress';
+          } else {
+            title += ' — not started';
+          }
+          html += `<i class="${cls}" title="${escapeHtml(title)}"></i>`;
+        });
+        html += `<i class="${terminal ? 'done' : ''}" title="merge complete / verified"></i>`;
+        const nowName = idx >= 0 && idx < 6 ? SEGMENTS[idx] : (phase ?? 'unknown');
+        const nextName = idx >= 0 && idx < 5 ? SEGMENTS[idx + 1] : 'merge';
+        const label = terminal
+          ? `shipped (${phase})`
+          : isFailing
+            ? `now: ${nowName} ✗ · next: ${nextName}`
+            : `now: ${nowName} · next: ${nextName}`;
+        el.innerHTML = html + `<span class="pipe-label">${escapeHtml(label)}</span>`;
+      }
+
+      /* ---------- open helpers / copy ---------- */
+      async function doOpen(id) {
+        try {
+          await api('/api/open', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ flow: id, file: '.' }),
+          });
+        } catch {
+          /* best effort */
+        }
+      }
+
+      let activeCopyPopover = null;
+      function closeCopyPopover() {
+        if (activeCopyPopover) {
+          activeCopyPopover.remove();
+          activeCopyPopover = null;
+        }
+      }
+
+      function flashCopied(btn, originalLabel) {
+        btn.textContent = 'Copied ✓';
+        btn.classList.add('copied');
+        clearTimeout(btn._copyTimer);
+        btn._copyTimer = setTimeout(() => {
+          btn.textContent = originalLabel;
+          btn.classList.remove('copied');
+        }, 1500);
+      }
+
+      function showCopyPopover(btn, cmd) {
+        closeCopyPopover();
+        const pop = document.createElement('div');
+        pop.className = 'copy-popover';
+        pop.innerHTML = '<input type="text" readonly />';
+        document.body.appendChild(pop);
+        const rect = btn.getBoundingClientRect();
+        pop.style.top = `${window.scrollY + rect.bottom + 6}px`;
+        pop.style.left = `${window.scrollX + rect.left}px`;
+        const input = pop.querySelector('input');
+        input.value = cmd;
+        input.focus();
+        input.select();
+        activeCopyPopover = pop;
+        setTimeout(() =>
+          document.addEventListener('click', dismissCopyPopoverOnce, { once: true }),
+        );
+      }
+      function dismissCopyPopoverOnce(e) {
+        if (activeCopyPopover && !activeCopyPopover.contains(e.target)) closeCopyPopover();
+      }
+
+      async function copy(cmd, btn) {
+        const originalLabel = btn.dataset.label ?? btn.textContent;
+        btn.dataset.label = originalLabel;
+        try {
+          if (!navigator.clipboard || !navigator.clipboard.writeText)
+            throw new Error('no clipboard');
+          await navigator.clipboard.writeText(cmd);
+          flashCopied(btn, originalLabel);
+        } catch {
+          showCopyPopover(btn, cmd);
+        }
+      }
+
+      function linkBtn(text, onClick) {
+        const b = document.createElement('button');
+        b.type = 'button';
+        b.className = 'linklike';
+        b.textContent = text;
+        b.addEventListener('click', (e) => {
+          e.stopPropagation();
+          onClick();
+        });
+        return b;
+      }
+      function linkA(text, href) {
+        const a = document.createElement('a');
+        a.className = 'linklike';
+        a.textContent = text;
+        a.href = href;
+        a.target = '_blank';
+        a.rel = 'noopener noreferrer';
+        a.addEventListener('click', (e) => e.stopPropagation());
+        return a;
+      }
+      function copyBtn(text, cmd) {
+        const b = document.createElement('button');
+        b.type = 'button';
+        b.className = 'linklike copy-btn';
+        b.textContent = text;
+        b.dataset.label = text;
+        b.title = cmd;
+        b.addEventListener('click', (e) => {
+          e.stopPropagation();
+          copy(cmd, b);
+        });
+        return b;
+      }
+
+      function renderLinks(el, flow) {
+        const parts = [];
+        if (flow.kind === 'ship') {
+          if (flow.docs?.some((d) => d.name === 'plan.md'))
+            parts.push(linkBtn('Plan', () => openFlow(flow.id, 'plan')));
+          if (flow.docs?.some((d) => d.name === 'scope.md'))
+            parts.push(linkBtn('Scope', () => openFlow(flow.id, 'scope')));
+          if (flow.pr?.url) parts.push(linkA('PR ↗', flow.pr.url));
+          if (flow.action === 'merge' && flow.pr?.number != null)
+            parts.push(copyBtn('Copy merge', mergeCmd(flow)));
+        } else if (flow.kind === 'pr') {
+          if (flow.pr?.url) parts.push(linkA('PR ↗', flow.pr.url));
+          parts.push(linkBtn('Checks', () => openFlow(flow.id, 'pr')));
+        } else if (flow.kind === 'task') {
+          if (flow.task?.url) parts.push(linkA('Linear ↗', flow.task.url));
+        } else if (flow.kind === 'branch' || flow.kind === 'session') {
+          parts.push(linkBtn('Open ↗', () => doOpen(flow.id)));
+        }
+        el.innerHTML = '';
+        for (const p of parts) el.appendChild(p);
+      }
+
+      /* ---------- card element (skeleton + patch) ---------- */
+      function createCardSkeleton(flow) {
+        const el = document.createElement('div');
+        el.className = 'card';
+        el.dataset.id = flow.id;
+        el.tabIndex = 0;
+        el.setAttribute('role', 'button');
+        el.innerHTML =
+          '<div class="row"></div><div class="title"></div><div class="pipe" hidden></div>' +
+          '<div class="meta"></div><div class="foot"><span class="age"></span><div class="links"></div></div>';
+        el.addEventListener('click', () => openFlow(flow.id));
+        el.addEventListener('keydown', (e) => {
+          if (e.key === 'Enter') {
+            e.preventDefault();
+            openFlow(flow.id);
+          }
+        });
+        return el;
+      }
+
+      function patchCard(el, flow) {
+        el.dataset.group = flow.group;
+        el.classList.toggle('needs-you', flow.group === 'needsYou');
+        el.classList.toggle('is-failing', flow.group === 'failing');
+        el.setAttribute('aria-label', `${flow.title} — ${flow.statusLine || flow.group}`);
+
+        renderChipRow(el.querySelector('.row'), buildChips(flow));
+
+        const titleEl = el.querySelector('.title');
+        if (titleEl.textContent !== flow.title) titleEl.textContent = flow.title;
+
+        const pipeEl = el.querySelector('.pipe');
+        if (flow.kind === 'ship') {
+          pipeEl.hidden = false;
+          renderPipe(pipeEl, flow);
+        } else {
+          pipeEl.hidden = true;
+          pipeEl.innerHTML = '';
+        }
+
+        const metaEl = el.querySelector('.meta');
+        const meta = metaLine(flow);
+        if (metaEl.textContent !== meta) metaEl.textContent = meta;
+
+        const ageEl = el.querySelector('.age');
+        const now = Date.now();
+        ageEl.textContent = fmtAge(flow.waitingSince, now);
+        ageEl.className = `age ${ageClass(flow.waitingSince, now)}`;
+
+        renderLinks(el.querySelector('.links'), flow);
+      }
+
+      /* ---------- thin row (task/branch inside notStarted/shipped) ---------- */
+      function isThin(group, flow) {
+        return (
+          (group === 'notStarted' || group === 'shipped') &&
+          (flow.kind === 'task' || flow.kind === 'branch')
+        );
+      }
+      function createThinSkeleton(flow) {
+        const el = document.createElement('div');
+        el.className = 'thin-row';
+        el.dataset.id = flow.id;
+        el.tabIndex = 0;
+        el.setAttribute('role', 'button');
+        el.innerHTML =
+          '<span class="thin-chip chip src"></span><span class="thin-title"></span>' +
+          '<span class="thin-meta"></span><span class="thin-age"></span>';
+        el.addEventListener('click', () => openFlow(flow.id));
+        el.addEventListener('keydown', (e) => {
+          if (e.key === 'Enter') {
+            e.preventDefault();
+            openFlow(flow.id);
+          }
+        });
+        return el;
+      }
+      function patchThinRow(el, flow) {
+        el.dataset.group = flow.group;
+        el.querySelector('.thin-chip').textContent = flow.kind === 'task' ? 'Linear' : 'Branch';
+        el.querySelector('.thin-title').textContent = flow.title;
+        el.querySelector('.thin-meta').textContent = metaLine(flow);
+        el.querySelector('.thin-age').textContent = fmtAge(flow.waitingSince, Date.now());
+        el.setAttribute('aria-label', `${flow.title} — ${flow.statusLine || flow.group}`);
+      }
+
+      /* ---------- board reconciliation ---------- */
+      let sectionEls = {};
+      let gridEls = {};
+      let cardEls = new Map(); // id -> element (card or thin-row)
+      let flowsById = new Map();
+      let lastListByGroup = {};
+      let pointerOverBoard = false;
+
+      function createSections() {
+        const board = document.getElementById('board');
+        for (const g of GROUPS) {
+          const section = document.createElement('section');
+          section.className = 'bsection';
+          section.dataset.group = g;
+          section.hidden = true;
+          const h3 = document.createElement('h3');
+          if (g === 'needsYou' || g === 'failing') h3.classList.add('warn');
+          h3.innerHTML = `<span class="label">${GROUP_LABEL[g]}</span> <span class="count">0</span>`;
+          const grid = document.createElement('div');
+          grid.className = 'grid';
+          section.appendChild(h3);
+          section.appendChild(grid);
+          board.appendChild(section);
+          sectionEls[g] = section;
+          gridEls[g] = grid;
+        }
+        board.addEventListener('mouseenter', () => {
+          pointerOverBoard = true;
+        });
+        board.addEventListener('mouseleave', () => {
+          pointerOverBoard = false;
+        });
+      }
+
+      function highlightMove(el) {
+        el.classList.add('moved');
+        clearTimeout(el._moveTimer);
+        el._moveTimer = setTimeout(() => el.classList.remove('moved'), 1500);
+      }
+
+      function computeColumns(grid) {
+        const w = grid.clientWidth || 800;
+        return Math.max(1, Math.floor((w + 10) / (240 + 10)));
+      }
+
+      function isExpanded(group) {
+        try {
+          return localStorage.getItem(`shipyard.expanded.${group}`) === '1';
+        } catch {
+          return false;
+        }
+      }
+      function setExpanded(group, val) {
+        try {
+          localStorage.setItem(`shipyard.expanded.${group}`, val ? '1' : '0');
+        } catch {
+          /* ignore */
+        }
+      }
+
+      function renderCollapse(group, sectionEl, grid, total) {
+        const h3 = sectionEl.querySelector('h3');
+        let btn = h3.querySelector('.show-all-btn');
+        if (group !== 'notStarted' && group !== 'shipped') {
+          Array.from(grid.children).forEach((el) => el.classList.remove('hidden-collapsed'));
+          if (btn) btn.hidden = true;
+          return;
+        }
+        const expanded = isExpanded(group);
+        const anyThin = !!grid.querySelector('.thin-row');
+        const limit = expanded ? total : anyThin ? Math.min(5, total) : computeColumns(grid);
+        Array.from(grid.children).forEach((el, i) => {
+          el.classList.toggle('hidden-collapsed', i >= limit);
+        });
+        if (total > limit || expanded) {
+          if (!btn) {
+            btn = document.createElement('button');
+            btn.type = 'button';
+            btn.className = 'show-all-btn linklike';
+            h3.appendChild(btn);
+          }
+          btn.hidden = false;
+          btn.textContent = expanded ? 'show less' : `show all ${total}`;
+          btn.onclick = () => {
+            setExpanded(group, !expanded);
+            renderSection(group, lastListByGroup[group] ?? []);
+          };
+        } else if (btn) {
+          btn.hidden = true;
+        }
+      }
+
+      function reorderGrid(grid, desiredIds) {
+        for (const id of desiredIds) {
+          const el = cardEls.get(id);
+          if (el && el.parentElement === grid) grid.appendChild(el);
+        }
+      }
+
+      function renderSection(group, list) {
+        lastListByGroup[group] = list;
+        const sectionEl = sectionEls[group];
+        const grid = gridEls[group];
+        sectionEl.hidden = list.length === 0;
+        sectionEl.querySelector('h3 .count').textContent = list.length;
+        if (list.length === 0) return;
+
+        const desiredIds = list.map((f) => f.id);
+        for (const flow of list) {
+          const thin = isThin(group, flow);
+          let el = cardEls.get(flow.id);
+          if (!el) {
+            el = thin ? createThinSkeleton(flow) : createCardSkeleton(flow);
+            cardEls.set(flow.id, el);
+            grid.appendChild(el);
+            (thin ? patchThinRow : patchCard)(el, flow);
+            continue;
+          }
+          (thin ? patchThinRow : patchCard)(el, flow);
+          const belongsHere = el.parentElement === grid;
+          if (!belongsHere) {
+            if (pointerOverBoard) continue; // deferred until pointer leaves
+            grid.appendChild(el);
+            highlightMove(el);
+          }
+        }
+
+        if (!pointerOverBoard) reorderGrid(grid, desiredIds);
+        renderCollapse(group, sectionEl, grid, list.length);
+      }
+
+      function updateStatChips(byGroup) {
+        setStat('needsYou', byGroup.get('needsYou').length, 'need you', true);
+        setStat('failing', byGroup.get('failing').length, 'failing', true);
+        setStat('active', byGroup.get('active').length, 'active', false);
+        setStat('stale', byGroup.get('stale').length, 'stale', false);
+      }
+      function setStat(group, count, label, warnIfNonzero) {
+        const el = document.getElementById(`stat-${group}`);
+        el.textContent = `${count} ${label}`;
+        el.classList.toggle('warn', warnIfNonzero && count > 0);
+      }
+
+      function toggleEmptyState(data) {
+        const empty = (data.flows ?? []).length === 0;
+        const el = document.getElementById('empty-state');
+        el.hidden = !empty;
+        if (!empty) return;
+        const roots = data.setup?.roots ?? [];
+        el.innerHTML =
+          `<p>Scanned ${roots.length} root${roots.length === 1 ? '' : 's'}` +
+          (roots.length ? ` (${roots.map(escapeHtml).join(', ')})` : '') +
+          ` · 0 flows</p><button type="button" id="empty-edit-roots" class="linklike">edit scan roots</button>`;
+        const editBtn = document.getElementById('empty-edit-roots');
+        editBtn.addEventListener('click', () => {
+          document.getElementById('setup').hidden = false;
+          document.getElementById('setup').scrollIntoView({ behavior: 'smooth' });
+        });
+      }
+
+      function reconcileFlows(data) {
+        const flows = data.flows ?? [];
+        const byGroup = new Map(GROUPS.map((g) => [g, []]));
+        const newIds = new Set();
+        for (const f of flows) {
+          newIds.add(f.id);
+          flowsById.set(f.id, f);
+          (byGroup.get(f.group) ?? byGroup.get('active')).push(f);
+        }
+        for (const list of byGroup.values()) list.sort((a, b) => waitKey(a) - waitKey(b));
+
+        for (const [id, el] of Array.from(cardEls)) {
+          if (!newIds.has(id)) {
+            el.remove();
+            cardEls.delete(id);
+            flowsById.delete(id);
+          }
+        }
+
+        updateStatChips(byGroup);
+        toggleEmptyState(data);
+        for (const group of GROUPS) renderSection(group, byGroup.get(group));
+      }
+
+      /* ---------- drawer: hash routing ---------- */
+      let drawerState = { id: null, tab: 'status', lastPhase: null, lastGroup: null };
+      const drawerEl = document.getElementById('drawer');
+      const drawerBody = document.getElementById('drawer-body');
+      const docCache = new Map();
+
+      function parseHash() {
+        const m = location.hash.match(/^#flow\/([^/]+)\/?([^/]*)$/);
+        if (!m) return null;
+        const id = decodeURIComponent(m[1]);
+        const tab = TABS.includes(m[2]) ? m[2] : 'status';
+        return { id, tab };
+      }
+
+      function openFlow(id, tab) {
+        const current = parseHash();
+        const useTab = tab ?? (current && current.id === id ? current.tab : 'status');
+        const newHash = `#flow/${encodeURIComponent(id)}/${useTab}`;
+        if (location.hash === newHash) onHashChange();
+        else location.hash = newHash;
+      }
+
+      function closeDrawer() {
+        if (parseHash()) history.pushState(null, '', location.pathname + location.search);
+        closeDrawerUI();
+      }
+      function closeDrawerUI() {
+        drawerEl.hidden = true;
+        document.body.classList.remove('drawer-open');
+        drawerState.id = null;
+      }
+
+      function onHashChange() {
+        const parsed = parseHash();
+        if (!parsed) {
+          closeDrawerUI();
+          return;
+        }
+        openDrawerUI(parsed.id, parsed.tab);
+      }
+      window.addEventListener('hashchange', onHashChange);
+
+      async function loadDocContent(flow, name) {
+        const doc = flow.docs?.find((d) => d.name === name);
+        if (!doc) return null;
+        if (doc.content != null) return doc.content;
+        const key = `${flow.id}:${name}:${doc.mtimeMs}`;
+        if (docCache.has(key)) return docCache.get(key);
+        try {
+          const res = await api(
+            `/api/doc?flow=${encodeURIComponent(flow.id)}&file=${encodeURIComponent(name)}`,
+          );
+          if (!res.ok) return null;
+          const data = await res.json();
+          docCache.set(key, data.content);
+          return data.content;
+        } catch {
+          return null;
+        }
+      }
+
+      function renderStatusTab(flow) {
+        if (flow.broken) {
+          return (
+            `<div class="notice error">${escapeHtml(flow.statusLine)}</div>` +
+            `<p class="muted">This run's state.json could not be parsed. Check the run at ` +
+            `<code>${escapeHtml(flow.worktree ?? '(unknown worktree)')}</code>.</p>` +
+            `<div class="drawer-actions" data-drawer-actions></div>`
+          );
+        }
+        const phase = flow.state?.phase ?? flow.statusLine ?? '—';
+        const actionLabel = flow.action ? (ACTION_LABEL[flow.action] ?? flow.action) : null;
+        const last = flow.timeline?.length ? flow.timeline[flow.timeline.length - 1] : null;
+        let out = `<dl class="status-dl"><dt>Stage</dt><dd>${escapeHtml(phase)}</dd><dt>Status</dt><dd>${escapeHtml(flow.statusLine || '—')}</dd></dl>`;
+        if (actionLabel) out += `<p><strong>Needed:</strong> ${escapeHtml(actionLabel)}</p>`;
+        if (last) {
+          out += `<p class="muted">Last event: <strong>${escapeHtml(last.phase ?? 'note')}</strong> — ${escapeHtml(fmtTime(last.at))}${last.note ? ` — ${escapeHtml(last.note)}` : ''}</p>`;
+        }
+        if (Array.isArray(flow.degraded) && flow.degraded.length) {
+          out += `<div class="row">${flow.degraded.map((d) => `<span class="chip stale">${escapeHtml(describeDegraded(d))}</span>`).join('')}</div>`;
+        }
+        out += `<div class="drawer-actions" data-drawer-actions></div>`;
+        return out;
+      }
+
+      function renderRequestTab(flow) {
+        const req = flow.state?.request;
+        if (!req) return '<p class="muted">No original request captured for this flow.</p>';
+        return `<pre class="request-text">${escapeHtml(req)}</pre>`;
+      }
+
+      function renderTimelineTab(flow) {
+        if (!flow.timeline?.length) return '<p class="muted">No timeline yet.</p>';
+        return (
+          '<ol class="timeline">' +
+          flow.timeline
+            .map((t) => {
+              const report = flow.docs?.find((d) => d.rel === `reports/${t.phase}.md`);
+              return (
+                `<li><span class="tl-phase">${escapeHtml(t.phase ?? 'note')}</span>` +
+                `<span class="tl-time">${escapeHtml(fmtTime(t.at))}</span>` +
+                (t.note ? `<p class="tl-note">${escapeHtml(t.note)}</p>` : '') +
+                (report
+                  ? `<span class="tl-report">report: ${escapeHtml(report.name)}</span>`
+                  : '') +
+                `</li>`
+              );
+            })
+            .join('') +
+          '</ol>'
+        );
+      }
+
+      async function renderDocTab(flow, name, label) {
+        const doc = flow.docs?.find((d) => d.name === name);
+        if (!doc) return `<p class="muted">No ${escapeHtml(label)} doc yet.</p>`;
+        const content = await loadDocContent(flow, name);
+        if (content == null)
+          return `<p class="muted">${escapeHtml(label)} doc could not be loaded.</p>`;
+        return renderMd(content);
+      }
+
+      function renderPrTab(flow) {
+        if (!flow.pr) return '<p class="muted">No PR linked to this flow.</p>';
+        const d = flow.pr.detail;
+        let html =
+          `<dl class="status-dl"><dt>PR</dt><dd><a class="linklike" href="${escapeHtml(flow.pr.url)}" target="_blank" rel="noopener noreferrer">#${flow.pr.number} ↗</a></dd>` +
+          `<dt>Title</dt><dd>${escapeHtml(flow.pr.title ?? '')}</dd><dt>Draft</dt><dd>${flow.pr.isDraft ? 'yes' : 'no'}</dd>`;
+        if (d) {
+          html +=
+            `<dt>State</dt><dd>${escapeHtml(d.state ?? '—')}</dd>` +
+            `<dt>Review</dt><dd>${escapeHtml(d.reviewDecision ?? 'pending')}</dd>` +
+            `<dt>Checks</dt><dd>${d.checks ? `${d.checks.pass} pass · ${d.checks.fail} fail · ${d.checks.pending} pending` : '—'}</dd>` +
+            `<dt>Checked</dt><dd>${d.fetchedAt != null ? fmtShortAge(d.fetchedAt, Date.now()) + ' ago' : '—'}</dd>`;
+        } else {
+          html += `<dt>Checks</dt><dd class="muted">not fetched yet</dd>`;
+        }
+        return html + '</dl>';
+      }
+
+      function renderGitTab(flow) {
+        const g = flow.git;
+        if (!g) return '<p class="muted">No git info.</p>';
+        let html =
+          `<dl class="status-dl"><dt>Dirty files</dt><dd>${g.dirtyFiles ?? 0}</dd>` +
+          `<dt>Ahead / behind</dt><dd>${g.ahead ?? '—'} / ${g.behind ?? '—'}</dd>` +
+          `<dt>Last commit</dt><dd>${escapeHtml(g.lastCommitSubject ?? '—')}${g.lastCommitTs ? ` — ${escapeHtml(fmtTime(g.lastCommitTs))}` : ''}</dd></dl>`;
+        if (Array.isArray(g.commits) && g.commits.length) {
+          html +=
+            '<h4>Recent commits</h4><ul class="commit-list">' +
+            g.commits
+              .map(
+                (c) =>
+                  `<li><code>${escapeHtml((c.sha || '').slice(0, 7))}</code> ${escapeHtml(c.subject)}</li>`,
+              )
+              .join('') +
+            '</ul>';
+        }
+        return html;
+      }
+
+      async function renderDrawerBody() {
+        const flow = flowsById.get(drawerState.id);
+        if (!flow) {
+          drawerBody.innerHTML = '<p class="muted">Flow no longer available.</p>';
+          return;
+        }
+        const scrollTop = drawerBody.scrollTop;
+        let html = '';
+        switch (drawerState.tab) {
+          case 'status':
+            html = renderStatusTab(flow);
+            break;
+          case 'request':
+            html = renderRequestTab(flow);
+            break;
+          case 'timeline':
+            html = renderTimelineTab(flow);
+            break;
+          case 'plan':
+            html = await renderDocTab(flow, 'plan.md', 'Plan');
+            break;
+          case 'scope':
+            html = await renderDocTab(flow, 'scope.md', 'Scope');
+            break;
+          case 'proof':
+            html = await renderDocTab(flow, 'proof-of-work.md', 'Proof of work');
+            break;
+          case 'pr':
+            html = renderPrTab(flow);
+            break;
+          case 'git':
+            html = renderGitTab(flow);
+            break;
+        }
+        drawerBody.innerHTML = html;
+        wireDrawerBodyActions(flow);
+        drawerBody.scrollTop = scrollTop;
+      }
+
+      function wireDrawerBodyActions(flow) {
+        const box = drawerBody.querySelector('[data-drawer-actions]');
+        if (!box) return;
+        if (flow.kind === 'ship') box.appendChild(copyBtn('Copy /ship resume', resumeCmd(flow)));
+        if (flow.action === 'merge' && flow.pr?.number != null)
+          box.appendChild(copyBtn('Copy merge command', mergeCmd(flow)));
+        if (flow.pr?.url) box.appendChild(linkA('Open PR ↗', flow.pr.url));
+        if (flow.task?.url) box.appendChild(linkA('Open in Linear ↗', flow.task.url));
+        if (flow.kind === 'ship' || flow.kind === 'branch' || flow.kind === 'session') {
+          box.appendChild(linkBtn('Open in editor ↗', () => doOpen(flow.id)));
+        }
+      }
+
+      function renderTabsBar() {
+        const nav = document.getElementById('drawer-tabs');
+        nav.innerHTML = '';
+        for (const t of TABS) {
+          const b = document.createElement('button');
+          b.type = 'button';
+          b.className = 'drawer-tab';
+          b.textContent = TAB_LABEL[t];
+          b.dataset.tab = t;
+          b.setAttribute('role', 'tab');
+          b.addEventListener('click', () => openFlow(drawerState.id, t));
+          nav.appendChild(b);
+        }
+        updateActiveTab();
+      }
+      function updateActiveTab() {
+        document.querySelectorAll('.drawer-tab').forEach((b) => {
+          const active = b.dataset.tab === drawerState.tab;
+          b.classList.toggle('active', active);
+          b.setAttribute('aria-selected', String(active));
+        });
+      }
+
+      function renderDrawerChrome(flow) {
+        const titleEl = document.getElementById('drawer-title');
+        const statusEl = document.getElementById('drawer-status');
+        if (!flow) {
+          titleEl.textContent = 'Flow';
+          statusEl.innerHTML = '';
+          return;
+        }
+        titleEl.textContent = flow.title;
+        const chips = buildChips(flow);
+        statusEl.innerHTML =
+          `<div class="row">${chips.map((c) => `<span class="${c.cls}">${escapeHtml(c.text)}</span>`).join('')}</div>` +
+          `<div class="meta">${escapeHtml(metaLine(flow))}</div>`;
+      }
+
+      function showDrawerNotice(text) {
+        const el = document.getElementById('drawer-notice');
+        el.textContent = `${text} (dismiss)`;
+        el.hidden = false;
+      }
+      function clearDrawerNotice() {
+        document.getElementById('drawer-notice').hidden = true;
+      }
+
+      async function openDrawerUI(id, tab) {
+        const flow = flowsById.get(id);
+        const isNewFlow = drawerState.id !== id;
+        drawerEl.hidden = false;
+        document.body.classList.add('drawer-open');
+        drawerState.id = id;
+        drawerState.tab = tab;
+        if (isNewFlow) {
+          drawerState.lastPhase = phaseOf(flow);
+          drawerState.lastGroup = flow?.group ?? null;
+          clearDrawerNotice();
+          renderTabsBar();
+        } else {
+          updateActiveTab();
+        }
+        renderDrawerChrome(flow);
+        await renderDrawerBody();
+      }
+
+      function refreshOpenDrawer(newFlow) {
+        const phaseKey = phaseOf(newFlow);
+        if (drawerState.lastPhase != null && phaseKey !== drawerState.lastPhase) {
+          showDrawerNotice(`stage changed: ${drawerState.lastPhase} → ${phaseKey}`);
+        }
+        drawerState.lastPhase = phaseKey;
+        drawerState.lastGroup = newFlow.group;
+        renderDrawerChrome(newFlow);
+        renderDrawerBody();
+      }
+
+      /* ---------- health / freshness ---------- */
+      let lastPollAt = null;
+      let lastPollFailed = false;
+
+      function updateHealth(health) {
+        const row = document.getElementById('health-row');
+        if (!health) {
+          row.innerHTML = '';
+          return;
+        }
+        const now = Date.now();
+        const parts = ['git', 'gh', 'linear']
+          .filter((k) => health[k])
+          .map((k) => {
+            const h = health[k];
+            const age = h.lastOkAt != null ? fmtShortAge(h.lastOkAt, now) : null;
+            const label = h.ok ? `${k} ✓${age ? ` ${age}` : ''}` : `${k} ✗ ${h.reason ?? 'error'}`;
+            return `<button type="button" class="health-item ${h.ok ? 'ok' : 'fail'}" title="${escapeHtml(h.reason ?? (h.ok ? 'ok' : 'error'))}">${escapeHtml(label)}</button>`;
+          });
+        row.innerHTML = parts.join('<span class="sep">·</span>');
+      }
+
+      function updateFreshness() {
+        const el = document.getElementById('freshness');
+        if (lastPollFailed) {
+          el.textContent = 'refresh failed';
+          return;
+        }
+        el.textContent =
+          lastPollAt == null
+            ? 'refreshed —'
+            : `refreshed ${fmtShortAge(lastPollAt, Date.now())} ago`;
+      }
+      setInterval(updateFreshness, 1000);
+
+      /* ---------- setup panel ---------- */
+      let setupTouched = false;
+      function updateSetup(setup) {
+        const setupEl = document.getElementById('setup');
+        const show = !!(setup && (setup.created || setup.missingRoots?.length));
+        if (!setupEl.dataset.manual) setupEl.hidden = !show;
+        const banner = document.getElementById('setup-banner');
+        const lines = [];
+        if (setup?.created)
+          lines.push(
+            'No config file found yet — using defaults. Save to create ~/.claude/shipyard.config.json.',
+          );
+        if (setup?.missingRoots?.length) {
+          lines.push(
+            `Missing / unreadable root${setup.missingRoots.length > 1 ? 's' : ''}: ${setup.missingRoots.join(', ')}`,
+          );
+        }
+        banner.innerHTML = lines
+          .map((l) => `<div class="banner-line">${escapeHtml(l)}</div>`)
+          .join('');
+        if (!setupTouched) {
+          document.getElementById('setup-roots').value = (setup?.roots ?? []).join('\n');
+        }
+      }
+
+      /* ---------- boot / static wiring ---------- */
+      async function poll() {
+        try {
+          const res = await api('/api/flows');
+          const data = await res.json();
+          lastPollAt = Date.now();
+          lastPollFailed = false;
+          updateFreshness();
+          updateHealth(data.health);
+          updateSetup(data.setup);
+          reconcileFlows(data);
+          if (drawerState.id) {
+            const fresh = flowsById.get(drawerState.id);
+            if (fresh) refreshOpenDrawer(fresh);
+          }
+        } catch {
+          lastPollFailed = true;
+          updateFreshness();
+        }
+      }
+
+      function wireStaticUI() {
+        document.querySelectorAll('.boardbar .stat').forEach((btn) => {
+          btn.addEventListener('click', () => {
+            const g = btn.dataset.group;
+            const sectionEl = sectionEls[g];
+            if (sectionEl && !sectionEl.hidden)
+              sectionEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
+          });
+        });
+
+        document.getElementById('freshness').addEventListener('click', () => {
+          const row = document.getElementById('health-row');
+          const expanded = !row.hidden;
+          row.hidden = expanded;
+          document.getElementById('freshness').setAttribute('aria-expanded', String(!expanded));
+        });
+
+        document.getElementById('refresh-btn').addEventListener('click', async () => {
+          const btn = document.getElementById('refresh-btn');
+          const prev = btn.textContent;
+          btn.disabled = true;
+          btn.textContent = 'Refreshing…';
+          try {
+            await api('/api/refresh', { method: 'POST' });
+          } catch {
+            /* best effort */
+          }
+          await poll();
+          btn.disabled = false;
+          btn.textContent = prev;
+        });
+
+        document.getElementById('setup-roots').addEventListener('input', () => {
+          setupTouched = true;
+        });
+        document.getElementById('setup-save').addEventListener('click', async () => {
+          const roots = document
+            .getElementById('setup-roots')
+            .value.split('\n')
+            .map((s) => s.trim())
+            .filter(Boolean);
+          const workspace = document.getElementById('setup-workspace').value.trim();
+          const statusEl = document.getElementById('setup-status');
+          statusEl.textContent = 'Saving…';
+          try {
+            const body = { roots };
+            if (workspace) body.tracker = { workspace };
+            const res = await api('/api/config', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify(body),
+            });
+            if (!res.ok) throw new Error('save failed');
+            statusEl.textContent = 'Saved ✓';
+            setupTouched = false;
+            setTimeout(() => {
+              statusEl.textContent = '';
+            }, 2000);
+          } catch {
+            statusEl.textContent = 'Save failed';
+          }
+        });
+
+        document.getElementById('drawer-close').addEventListener('click', closeDrawer);
+        document.getElementById('drawer-back').addEventListener('click', closeDrawer);
+        document.getElementById('drawer-scrim').addEventListener('click', closeDrawer);
+        document.getElementById('drawer-notice').addEventListener('click', clearDrawerNotice);
+      }
+
+      /* ---------- keyboard: j/k/Enter/Esc ---------- */
+      function focusableItems() {
+        return Array.from(
+          document.querySelectorAll(
+            '#board .card:not(.hidden-collapsed), #board .thin-row:not(.hidden-collapsed)',
+          ),
+        );
+      }
+      function moveFocus(delta) {
+        const items = focusableItems();
+        if (!items.length) return;
+        const idx = items.indexOf(document.activeElement);
+        let next;
+        if (idx === -1) next = delta > 0 ? 0 : items.length - 1;
+        else next = Math.min(items.length - 1, Math.max(0, idx + delta));
+        items[next].focus();
+      }
+      document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape') {
+          if (!drawerEl.hidden) closeDrawer();
+          return;
+        }
+        const tag = (e.target.tagName || '').toLowerCase();
+        const typing = tag === 'input' || tag === 'textarea' || e.target.isContentEditable;
+        if (typing) return;
+        if (e.key === 'j' || e.key === 'k') {
+          e.preventDefault();
+          moveFocus(e.key === 'j' ? 1 : -1);
+        }
+      });
+
+      function boot() {
+        createSections();
+        wireStaticUI();
+        poll().then(onHashChange);
+        setInterval(poll, 5000);
+      }
+      document.addEventListener('DOMContentLoaded', boot);
+    </script>
   </body>
 </html>
