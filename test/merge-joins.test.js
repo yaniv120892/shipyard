@@ -169,6 +169,55 @@ test('same branch name in two repos stays two flows', () => {
   assert.equal(flows.length, 2);
 });
 
+test('two tasks matching same branch: first by ticket, second by branchName', () => {
+  const flows = buildFlows({
+    ...base,
+    branchCards: [
+      {
+        repoKey: 'k',
+        repoName: 'app',
+        branch: 'fix/yan-9-crash',
+        path: '/w1',
+        dirtyFiles: 0,
+        lastCommitTs: NOW,
+        lastCommitSubject: 's',
+        aheadBehind: null,
+        pending: false,
+      },
+    ],
+    tasks: [
+      {
+        identifier: 'YAN-9',
+        title: 'crash',
+        url: 'u1',
+        branchName: null,
+        state: 'Todo',
+        stateType: 'unstarted',
+      },
+      {
+        identifier: 'YAN-77',
+        title: 'follow-up',
+        url: 'u2',
+        branchName: 'fix/yan-9-crash',
+        state: 'Todo',
+        stateType: 'unstarted',
+      },
+    ],
+  });
+  // Exactly 2 flows: branch flow and task flow
+  assert.equal(flows.length, 2);
+  // Branch flow should have T1 attached (first match wins)
+  const branchFlow = flows.find((f) => f.kind === 'branch');
+  assert.equal(branchFlow.task.identifier, 'YAN-9');
+  // sources should contain 'task' exactly once
+  assert.equal(branchFlow.sources.filter((s) => s === 'task').length, 1);
+  // T2 should be a standalone task flow
+  const taskFlow = flows.find((f) => f.kind === 'task');
+  assert.equal(taskFlow.task.identifier, 'YAN-77');
+  assert.equal(taskFlow.sources.length, 1);
+  assert.equal(taskFlow.sources[0], 'task');
+});
+
 test('config.ignore silences repo and repo#branch globs', () => {
   const flows = buildFlows({
     ...base,
