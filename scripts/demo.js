@@ -10,7 +10,12 @@ export function buildDemoEngine() {
     getSnapshot: () => ({
       flows,
       scannedAt: Date.now(),
-      setup: { created: false, missingRoots: [], roots: ['~/Develop'] },
+      setup: {
+        created: false,
+        missingRoots: [],
+        roots: ['~/Develop'],
+        repoCount: new Set(flows.map((f) => f.repo?.key).filter(Boolean)).size,
+      },
       health: {
         git: { ok: true, lastOkAt: Date.now() },
         gh: { ok: false, reason: 'demo' },
