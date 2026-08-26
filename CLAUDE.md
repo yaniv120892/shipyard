@@ -33,3 +33,11 @@ this constraint.
 
 `lib/` code must never import `server.js` or anything under `public/`. Data flows
 one way: `server.js` and `bin/` depend on `lib/`, not the reverse.
+
+## Pull request checklist
+
+- Every PR must check whether `README.md` needs updating for the change.
+- Any PR that changes the UI (`public/index.html`) must refresh the affected
+  screenshots in `docs/screenshots/` in that same PR, captured via demo mode
+  and Playwright as documented (`node scripts/demo.js`, then drive it with
+  Playwright/Chromium).

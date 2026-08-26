@@ -1,7 +1,7 @@
 # Shipyard board — UI/UX review
 
 Reviewed as a daily user against `docs/DESIGN.md` §UI and `docs/board-mockups.html`
-(Option B), driving the demo board (`node scripts/demo.js`, fixture
+(Option B) (mockup later removed from the repo), driving the demo board (`node scripts/demo.js`, fixture
 `test/fixtures/demo-flows.json`) with Playwright/Chromium at 1440px and 640px,
 light and dark (`prefers-color-scheme`), keyboard-only, and across live poll
 cycles (5s) with mocked data changes. Screenshots for every finding are in
