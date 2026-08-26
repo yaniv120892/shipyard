@@ -1,0 +1,25 @@
+{
+  "name": "shipyard",
+  "version": "0.1.0",
+  "description": "Local dashboard for /ship runs, PRs, Linear tasks, and ambient work",
+  "type": "module",
+  "bin": {
+    "shipyard": "bin/shipyard"
+  },
+  "scripts": {
+    "test": "node --test",
+    "start": "node bin/shipyard",
+    "lint": "eslint .",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "check": "node --check server.js && node --check bin/shipyard && for f in lib/*.js lib/*/*.js; do [ -e \"$f\" ] || continue; node --check \"$f\" || exit 1; done"
+  },
+  "devDependencies": {
+    "eslint": "^9",
+    "prettier": "^3"
+  },
+  "engines": {
+    "node": ">=20"
+  },
+  "license": "MIT"
+}
