@@ -12,8 +12,10 @@ import { buildDemoEngine } from '../scripts/demo.js';
 const args = process.argv.slice(2);
 const demo = args.includes('--demo');
 const portFlag = args.includes('--port') ? Number(args[args.indexOf('--port') + 1]) : null;
-const { config, created, missingRoots } = loadConfig({});
+const { config, created, missingRoots, configError } = loadConfig({});
 const port = portFlag ?? config.port;
+if (configError)
+  console.log(`shipyard: config file could not be parsed (${configError}) — using defaults`);
 
 async function existingInstance(port) {
   try {
@@ -41,14 +43,15 @@ if (await existingInstance(port)) {
 const token = createToken();
 const engine = demo
   ? buildDemoEngine()
-  : createEngine({ config, setup: { created, missingRoots, roots: config.roots } });
+  : createEngine({ config, setup: { created, missingRoots, roots: config.roots, configError } });
 const server = createServer({ token, version: '0.1.0', engine, config });
 let bound;
 try {
   bound = await startServer(server, port);
 } catch {
-  bound = await startServer(server, 0);
-} // port taken by something else
+  bound = await startServer(server, 0); // port taken by something else
+  console.log(`port ${port} is taken by another app — using ${bound}`);
+}
 engine.start();
 // Archiver pidfile: snapshots are idempotent, so a second writer is wasteful, not
 // corrupting — record who owns archiving and clean up on exit.

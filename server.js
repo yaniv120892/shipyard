@@ -64,11 +64,16 @@ export function createServer({ token, version, engine, config }) {
         return json(res, 200, { opened: abs, ok: await engine.openInEditor(abs) });
       }
       if (req.method === 'POST' && url.pathname === '/api/refresh') {
+        // "Refresh now" should also pick up brand-new repos/worktrees, not just
+        // poll gh/Linear on the existing set.
+        await engine.refreshDiscovery();
         await engine.refreshNetwork();
         return json(res, 200, { ok: true });
       }
       if (req.method === 'POST' && url.pathname === '/api/config') {
-        return json(res, 200, { saved: saveUserConfig(await readBody(req), {}) });
+        const saved = saveUserConfig(await readBody(req), {});
+        await engine.updateConfig(saved);
+        return json(res, 200, { saved });
       }
       json(res, 404, { error: 'not found' });
     } catch (err) {

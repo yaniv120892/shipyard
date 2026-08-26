@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
-import { DEFAULTS, loadConfig, saveUserConfig } from '../lib/config.js';
+import { DEFAULTS, loadConfig, saveUserConfig, applyUserConfig } from '../lib/config.js';
 
 function fakeHome() {
   const home = fs.mkdtempSync(path.join(os.tmpdir(), 'shipyard-home-'));
@@ -33,6 +33,47 @@ test('loadConfig merges file over defaults and reports missing roots', () => {
   assert.deepEqual(config.roots, [path.join(home, 'code')]);
   assert.deepEqual(missingRoots, ['~/gone']);
   assert.equal(config.openCommand, 'code');
+});
+
+test('loadConfig on corrupt JSON reports configError instead of pretending first run (M2)', () => {
+  const home = fakeHome();
+  fs.mkdirSync(path.join(home, 'code'));
+  fs.writeFileSync(
+    path.join(home, '.claude', 'shipyard.config.json'),
+    '{ "roots": ["~/code"], INVALID JSON HERE !!!',
+  );
+  const { config, created, missingRoots, configError } = loadConfig({ home });
+  assert.equal(created, false);
+  assert.notEqual(configError, null);
+  assert.match(configError, /JSON/);
+  // still falls back to usable (default) roots rather than crashing or losing
+  // the session, using whichever DEFAULTS.roots actually exist on disk
+  assert.deepEqual(config.roots, [path.join(home, 'code')]);
+  assert.deepEqual(
+    missingRoots,
+    DEFAULTS.roots.filter((r) => r !== '~/code'),
+  );
+});
+
+test('loadConfig with no file has no configError', () => {
+  const home = fakeHome();
+  const { created, configError } = loadConfig({ home });
+  assert.equal(created, true);
+  assert.equal(configError, null);
+});
+
+test('applyUserConfig merges a saved partial into a live config, expanding roots (H2)', () => {
+  const home = fakeHome();
+  fs.mkdirSync(path.join(home, 'areaB'));
+  const config = { ...DEFAULTS, roots: ['/somewhere/areaA'] };
+  const { config: next, missingRoots } = applyUserConfig(
+    config,
+    { roots: ['~/areaB', '~/gone'] },
+    { home },
+  );
+  assert.deepEqual(next.roots, [path.join(home, 'areaB')]);
+  assert.deepEqual(missingRoots, ['~/gone']);
+  assert.equal(config.roots[0], '/somewhere/areaA'); // input left untouched
 });
 
 test('saveUserConfig writes only allow-listed keys', () => {
