@@ -1,7 +1,4 @@
 #!/usr/bin/env node
-import fs from 'node:fs';
-import os from 'node:os';
-import path from 'node:path';
 import { execFile } from 'node:child_process';
 import { loadConfig } from '../lib/config.js';
 import { createEngine } from '../lib/engine.js';
@@ -53,16 +50,6 @@ try {
   console.log(`port ${port} is taken by another app — using ${bound}`);
 }
 engine.start();
-// Archiver pidfile: snapshots are idempotent, so a second writer is wasteful, not
-// corrupting — record who owns archiving and clean up on exit.
-const pidFile = path.join(os.homedir(), '.claude', 'shipyard', 'archiver.pid');
-fs.mkdirSync(path.dirname(pidFile), { recursive: true });
-fs.writeFileSync(pidFile, String(process.pid));
-process.on('exit', () => {
-  try {
-    fs.rmSync(pidFile);
-  } catch {}
-});
 const url = `http://127.0.0.1:${bound}`;
 console.log(`shipyard: ${url}`);
 if (demo) console.log('demo mode — showing fixture data, nothing on disk is scanned');

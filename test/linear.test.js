@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import { linearProvider } from '../lib/tracker/linear.js';
 import { getProvider } from '../lib/tracker/provider.js';
 
-const CFG = { provider: 'linear', workspace: 'w', teams: [], projects: [], states: [], cap: 3 };
+const CFG = { provider: 'linear', states: [], cap: 3 };
 
 function page(nodes, endCursor, hasNextPage) {
   return {
@@ -26,7 +26,7 @@ const issue = (n) => ({
   title: `t${n}`,
   url: `http://i/${n}`,
   branchName: `me/yan-${n}-t`,
-  state: { name: 'Todo', type: 'unstarted' },
+  state: { name: 'Todo' },
 });
 
 test('paginates until the cap and flattens state fields', async () => {
@@ -41,7 +41,6 @@ test('paginates until the cap and flattens state fields', async () => {
     url: 'http://i/1',
     branchName: 'me/yan-1-t',
     state: 'Todo',
-    stateType: 'unstarted',
   });
 });
 

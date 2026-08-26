@@ -224,7 +224,7 @@
     "lastActivityMs": 1787718677474,
     "sources": ["ship"],
     "broken": false,
-    "sameTicketAs": null,
+    "sameTicketAs": "YAN-42",
     "state": {
       "slug": "price-alerts",
       "branch": "feat/price-alerts",

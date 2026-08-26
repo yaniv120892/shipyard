@@ -31,7 +31,7 @@ test('engine assembles a ship flow from a scanned worktree and archives it', asy
       networkTtlSeconds: 90,
       ignore: [],
       history: { maxEntries: 10, maxAgeDays: 10 },
-      tracker: { provider: 'linear', workspace: 'w', cap: 5 },
+      tracker: { provider: 'linear', cap: 5 },
     },
     home,
     deps: {
@@ -74,7 +74,7 @@ function baseConfig(area) {
     networkTtlSeconds: 90,
     ignore: [],
     history: { maxEntries: 10, maxAgeDays: 10 },
-    tracker: { provider: 'linear', workspace: 'w', cap: 5 },
+    tracker: { provider: 'linear', cap: 5 },
   };
 }
 

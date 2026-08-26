@@ -35,3 +35,19 @@ test('a linked worktree under the root does not create a duplicate repo', async 
   const repos = await discoverRepos([area], { maxDepth: 4 });
   assert.equal(repos.filter((r) => r.key === 'github.com/me/app').length, 1);
 });
+
+test('M3: gitStats records real git-probe outcomes, including a broken .git dir', async () => {
+  const area = makeArea();
+  makeRepo(area, 'good', { remote: 'git@github.com:me/good.git' });
+  // A directory that merely looks like a repo (has a `.git` entry) but isn't
+  // one — `git worktree list --porcelain` fails inside it, same class of
+  // failure a missing git binary or permission-broken repo would produce.
+  fs.mkdirSync(path.join(area, 'broken', '.git'), { recursive: true });
+
+  const gitStats = { calls: 0, failures: 0 };
+  const repos = await discoverRepos([area], { maxDepth: 2, gitStats });
+
+  assert.equal(repos.length, 1); // only 'good' is usable; 'broken' is skipped
+  assert.equal(gitStats.calls, 2);
+  assert.equal(gitStats.failures, 1);
+});
