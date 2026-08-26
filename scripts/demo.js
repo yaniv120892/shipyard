@@ -27,6 +27,11 @@ export function buildDemoEngine() {
     openTarget: () => null,
     openInEditor: async () => false,
     refreshNetwork: async () => {},
+    // `server.js` calls these unconditionally from "Refresh now" and the
+    // Setup-panel save route; demo mode has no filesystem/config to re-scan,
+    // so both are no-ops rather than 500s.
+    refreshDiscovery: async () => {},
+    updateConfig: async () => {},
     start() {},
   };
 }

@@ -18,7 +18,6 @@ test('collects non-default-branch worktrees with dirty count and last commit', a
   assert.equal(card.branch, 'feat/x');
   assert.equal(card.dirtyFiles, 1);
   assert.equal(typeof card.lastCommitSubject, 'string');
-  assert.equal(card.pending, false);
 });
 
 test('budget staggers uncached worktrees', async () => {
@@ -29,7 +28,8 @@ test('budget staggers uncached worktrees', async () => {
   const repos = await discoverRepos([area], { maxDepth: 3 });
   const collector = createBranchCollector();
   const first = await collector.collect(repos, { budget: 1 });
-  assert.equal(first.filter((c) => c.pending).length, 1);
+  // One worktree is over budget on this pass — its detail hasn't been fetched yet.
+  assert.equal(first.filter((c) => c.lastCommitTs == null).length, 1);
   const second = await collector.collect(repos, { budget: 1 });
-  assert.equal(second.filter((c) => c.pending).length, 0); // cache filled over two calls
+  assert.equal(second.filter((c) => c.lastCommitTs == null).length, 0); // cache filled over two calls
 });

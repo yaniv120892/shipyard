@@ -53,7 +53,7 @@ lib/collectors/
   prs.js              gh-based PR collector (GitHub repos only)
   sessions.js         Claude session transcript activity
 lib/tracker/
-  provider.js         interface: listMyOpenIssues(), issueUrl(), ticketPattern
+  provider.js         interface: listMyOpenIssues(), ticketPattern
   linear.js           Linear GraphQL implementation
 lib/merge.js          findings → Flow cards: identity, dedupe, needsYou,
                       failure states, precedence
@@ -124,16 +124,18 @@ All joins key on `(repoKey, branch)`:
 "waiting 3 hours for the user's answers". The rule set (unit-tested with a
 fixture tree per row):
 
-| phase                                | gate artifact exists | recent agent activity* | group / action                     |
-| ------------------------------------ | -------------------- | ---------------------- | ---------------------------------- |
-| scope                                | `scope.md` present   | no                     | needsYou / answer-questions        |
-| scope                                | —                    | yes                    | active                             |
-| plan                                 | `plan.md` present    | no                     | needsYou / approve-plan            |
-| plan                                 | —                    | yes                    | active                             |
-| plan-approved, implement, polish, qa | —                    | yes                    | active                             |
-| plan-approved, implement, polish, qa | —                    | no (beyond threshold)  | failing ("run died mid-`<phase>`") |
-| ready-to-merge                       | —                    | —                      | needsYou / merge                   |
-| merged, verified                     | —                    | —                      | shipped                            |
+| phase                                | gate artifact exists | recent agent activity* | group / action                            |
+| ------------------------------------ | -------------------- | ---------------------- | ----------------------------------------- |
+| scope                                | `scope.md` present   | no                     | needsYou / answer-questions               |
+| scope                                | —                    | yes                    | active                                    |
+| scope                                | absent               | no (beyond threshold)  | failing ("run stalled before `scope.md`") |
+| plan                                 | `plan.md` present    | no                     | needsYou / approve-plan                   |
+| plan                                 | —                    | yes                    | active                                    |
+| plan                                 | absent               | no (beyond threshold)  | failing ("run stalled before `plan.md`")  |
+| plan-approved, implement, polish, qa | —                    | yes                    | active                                    |
+| plan-approved, implement, polish, qa | —                    | no (beyond threshold)  | failing ("run died mid-`<phase>`")        |
+| ready-to-merge                       | —                    | —                      | needsYou / merge                          |
+| merged, verified                     | —                    | —                      | shipped                                   |
 
 \* recent activity = any write inside `.claude/ship/` or a matching session
 transcript mtime within the activity threshold (default 10 min, configurable).
@@ -186,17 +188,17 @@ error never repaints the board.
   is closed (the PR collector still sees the merged PR on next launch and
   promotes the archived run via fate resolution).
 - Pruned at startup by `history.maxEntries` (default 200) and
-  `history.maxAgeDays` (default 90).
-- A pidfile under `~/.claude/shipyard/` locks the archiver; because snapshots
-  are idempotent mirrors, a second writer would be wasteful, not corrupting —
-  the lock exists to avoid the waste.
+  `history.maxAgeDays` (default 90). No archiver lock: snapshots are
+  idempotent mirrors, so a second writer would be wasteful, not corrupting —
+  not worth a pidfile nothing reads.
 
 ## Integrations
 
 **GitHub (`gh`):**
 
 - One `gh auth status` probe per refresh cycle gates all PR calls; on failure,
-  exponential backoff and a source-health error — no per-repo retry spam.
+  a source-health error and no per-repo retry spam — a plain per-cycle probe,
+  not exponential backoff (simpler, and the actual behavior).
 - Only repos classified GitHub get PR collection:
   `gh pr list --author "@me" --state open --json ...` per local repo.
   Deliberately not a global search — the board covers work present on this
@@ -210,12 +212,12 @@ error never repaints the board.
 
 - GraphQL with `LINEAR_API_KEY` from the environment; never stored in config.
 - Default query: assigned to me, state type `unstarted` or `started`;
-  config filters for teams/projects/states plus a result cap (default 50).
+  config filter for `states` plus a result cap (default 50).
 - Paginates with `first`/`endCursor` up to the cap; treats a GraphQL `errors`
   array as failure even on HTTP 200.
-- The provider interface (`listMyOpenIssues()`, `issueUrl(id)`,
-  `ticketPattern`) is the only Linear-aware surface; a Jira provider is one
-  new file plus `tracker.provider` in config.
+- The provider interface (`listMyOpenIssues()`, `ticketPattern`) is the only
+  Linear-aware surface; a Jira provider is one new file plus
+  `tracker.provider` in config.
 
 ## HTTP server & security
 
@@ -265,9 +267,6 @@ Never blocks rendering.
   "history": { "maxEntries": 200, "maxAgeDays": 90 },
   "tracker": {
     "provider": "linear",
-    "workspace": "yaniv-daye-personal",
-    "teams": [],
-    "projects": [],
     "states": [],
     "cap": 50,
   },

@@ -83,7 +83,7 @@ test('saveUserConfig writes only allow-listed keys', () => {
       roots: ['~/x'],
       openCommand: 'bash',
       port: 9999,
-      tracker: { provider: 'linear', workspace: 'w' },
+      tracker: { provider: 'linear', states: ['In Progress'] },
     },
     { home },
   );
@@ -91,7 +91,7 @@ test('saveUserConfig writes only allow-listed keys', () => {
     fs.readFileSync(path.join(home, '.claude', 'shipyard.config.json'), 'utf8'),
   );
   assert.deepEqual(onDisk.roots, ['~/x']);
-  assert.equal(onDisk.tracker.workspace, 'w');
+  assert.deepEqual(onDisk.tracker.states, ['In Progress']);
   assert.equal('openCommand' in onDisk, false);
   assert.equal('port' in onDisk, false);
 });

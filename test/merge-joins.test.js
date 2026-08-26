@@ -62,7 +62,6 @@ test('ship run absorbs its branch card, PR, task, and session', () => {
         url: 'http://t/9',
         branchName: 'me/yan-9-x',
         state: 'In Progress',
-        stateType: 'started',
       },
     ],
     sessions: [{ cwd: '/w/app-x', lastActiveAt: NOW - 30_000 }],
@@ -98,7 +97,6 @@ test('ticket in branch name joins the task; branchName is a secondary match', ()
         url: 'u',
         branchName: 'me/other',
         state: 'Todo',
-        stateType: 'unstarted',
       },
     ],
   });
@@ -142,7 +140,6 @@ test('multi-branch ticket tie-break prefers ship > pr > latest commit; losers ge
         url: 'u',
         branchName: null,
         state: 'Todo',
-        stateType: 'unstarted',
       },
     ],
   });
@@ -151,6 +148,18 @@ test('multi-branch ticket tie-break prefers ship > pr > latest commit; losers ge
   const stale = flows.find((f) => f.branch === 'old/yan-9-stale');
   assert.equal(stale.task, null);
   assert.equal(stale.sameTicketAs, 'YAN-9');
+});
+
+test('M1: a session cwd in a subdirectory of the worktree still attaches to the flow', () => {
+  const flows = buildFlows({
+    ...base,
+    shipRuns: [shipRun()],
+    sessions: [{ cwd: '/w/app-x/packages/api', lastActiveAt: NOW - 30_000 }],
+  });
+  assert.equal(flows.length, 1);
+  const ship = flows.find((f) => f.kind === 'ship');
+  assert.deepEqual(ship.sources.sort(), ['session', 'ship']);
+  assert.equal(ship.session.cwd, '/w/app-x/packages/api');
 });
 
 test('same branch name in two repos stays two flows', () => {
@@ -163,7 +172,6 @@ test('same branch name in two repos stays two flows', () => {
     lastCommitTs: NOW,
     lastCommitSubject: 's',
     aheadBehind: null,
-    pending: false,
   });
   const flows = buildFlows({ ...base, branchCards: [card('k1', '/a'), card('k2', '/b')] });
   assert.equal(flows.length, 2);
@@ -192,7 +200,6 @@ test('two tasks matching same branch: first by ticket, second by branchName', ()
         url: 'u1',
         branchName: null,
         state: 'Todo',
-        stateType: 'unstarted',
       },
       {
         identifier: 'YAN-77',
@@ -200,7 +207,6 @@ test('two tasks matching same branch: first by ticket, second by branchName', ()
         url: 'u2',
         branchName: 'fix/yan-9-crash',
         state: 'Todo',
-        stateType: 'unstarted',
       },
     ],
   });

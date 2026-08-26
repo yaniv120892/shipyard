@@ -405,6 +405,7 @@
         flex-wrap: wrap;
       }
       .pipe i {
+        position: relative;
         width: 14px;
         height: 5px;
         border-radius: 3px;
@@ -426,6 +427,19 @@
         background: var(--red);
         border-color: var(--red);
         outline-color: var(--red);
+      }
+      /* (c) — a failed segment must be legible without relying on color alone;
+         the ✗ used to live only in the text label, never on the glyph itself. */
+      .pipe i.now.fail::after {
+        content: '✗';
+        position: absolute;
+        top: -10px;
+        left: 50%;
+        transform: translateX(-50%);
+        font-size: 8px;
+        line-height: 1;
+        font-weight: 700;
+        color: var(--red);
       }
       .pipe-label {
         font-size: 11px;
@@ -936,10 +950,6 @@
           >Scan roots (one per line)
           <textarea id="setup-roots" rows="4" spellcheck="false"></textarea>
         </label>
-        <label
-          >Tracker workspace
-          <input id="setup-workspace" type="text" spellcheck="false" />
-        </label>
         <div class="setup-actions">
           <button type="button" id="setup-save">Save</button>
           <span id="setup-status"></span>
@@ -1221,6 +1231,12 @@
         if (Array.isArray(flow.degraded)) {
           for (const d of flow.degraded)
             chips.push({ cls: 'chip stale', text: describeDegraded(d) });
+        }
+
+        // M4 / DESIGN §Dedupe rule 3: the multi-branch tie-break loser keeps its
+        // own card, badged with the ticket the winner claimed.
+        if (flow.sameTicketAs) {
+          chips.push({ cls: 'chip src', text: `Same ticket: ${flow.sameTicketAs}` });
         }
 
         if (flow.kind === 'ship') chips.push({ cls: 'chip ship', text: 'Ship' });
@@ -2177,12 +2193,10 @@
             .value.split('\n')
             .map((s) => s.trim())
             .filter(Boolean);
-          const workspace = document.getElementById('setup-workspace').value.trim();
           const statusEl = document.getElementById('setup-status');
           statusEl.textContent = 'Saving…';
           try {
             const body = { roots };
-            if (workspace) body.tracker = { workspace };
             const res = await api('/api/config', {
               method: 'POST',
               headers: { 'Content-Type': 'application/json' },
