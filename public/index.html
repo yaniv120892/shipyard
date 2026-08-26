@@ -154,12 +154,28 @@
         flex: 1;
       }
       .freshness {
+        display: inline-flex;
+        align-items: center;
+        gap: 4px;
         background: none;
-        border: none;
+        border: 1px solid transparent;
+        border-radius: 999px;
         color: var(--ink-faint);
         font-size: 12px;
         cursor: pointer;
-        padding: 2px 4px;
+        padding: 3px 9px;
+      }
+      .freshness:hover {
+        background: var(--surface-2);
+        color: var(--ink-soft);
+        border-color: var(--border);
+      }
+      .freshness .chevron {
+        font-size: 9px;
+        transition: transform 0.15s ease;
+      }
+      .freshness[aria-expanded='true'] .chevron {
+        transform: rotate(180deg);
       }
       .refresh-btn {
         font-family: 'Archivo', sans-serif;
@@ -325,6 +341,12 @@
       .age-red {
         color: var(--red);
         font-weight: 700;
+        text-decoration: underline;
+        text-decoration-style: dotted;
+      }
+      .age-stale {
+        color: var(--stale);
+        font-weight: 600;
       }
       .age-unknown {
         color: var(--ink-faint);
@@ -345,8 +367,34 @@
       .linklike:hover {
         text-decoration: underline;
       }
+
+      /* copy buttons: distinct outline-chip affordance, not a plain nav link */
+      .copy-btn {
+        display: inline-flex;
+        align-items: center;
+        gap: 5px;
+        font-size: 11.5px;
+        font-weight: 600;
+        color: var(--ink-soft);
+        background: var(--surface-2);
+        border: 1px solid var(--border);
+        border-radius: 6px;
+        padding: 3px 9px 3px 7px;
+        cursor: pointer;
+        font-family: inherit;
+      }
+      .copy-btn:hover {
+        border-color: var(--accent);
+        color: var(--accent);
+      }
+      .copy-btn .copy-icon {
+        font-size: 12px;
+        line-height: 1;
+      }
       .copy-btn.copied {
         color: var(--green);
+        border-color: var(--green);
+        background: var(--green-bg);
       }
 
       /* pipeline strip */
@@ -614,11 +662,26 @@
         display: flex;
         flex-direction: column;
         gap: 6px;
+        max-height: 42vh;
+        overflow-y: auto;
       }
       .drawer-status .meta {
         font-family: 'IBM Plex Mono', monospace;
         font-size: 11.5px;
         color: var(--ink-faint);
+      }
+      .drawer-request {
+        padding: 10px 14px;
+        border-bottom: 1px solid var(--border);
+        max-height: 22vh;
+        overflow-y: auto;
+      }
+      .drawer-request .request-label {
+        color: var(--ink-faint);
+        font-size: 11px;
+        text-transform: uppercase;
+        letter-spacing: 0.04em;
+        margin-bottom: 5px;
       }
       .drawer-tabs {
         display: flex;
@@ -670,11 +733,35 @@
         padding-left: 22px;
       }
       .drawer-body pre {
+        position: relative;
         background: var(--surface-2);
         padding: 10px;
         border-radius: 8px;
         overflow-x: auto;
         font-size: 12.5px;
+        scrollbar-width: thin;
+        scrollbar-color: var(--ink-faint) transparent;
+      }
+      .drawer-body pre::-webkit-scrollbar {
+        height: 6px;
+      }
+      .drawer-body pre::-webkit-scrollbar-thumb {
+        background: var(--ink-faint);
+        border-radius: 3px;
+      }
+      .drawer-body pre::-webkit-scrollbar-track {
+        background: transparent;
+      }
+      .drawer-body pre.pre-overflow::after {
+        content: '';
+        position: absolute;
+        top: 0;
+        right: 0;
+        bottom: 6px;
+        width: 26px;
+        background: linear-gradient(to right, transparent, var(--surface-2));
+        pointer-events: none;
+        border-radius: 0 8px 8px 0;
       }
       .drawer-body code {
         font-family: 'IBM Plex Mono', monospace;
@@ -750,10 +837,29 @@
         font-size: 13px;
       }
       .tl-report {
-        display: block;
-        margin-top: 3px;
-        color: var(--ink-faint);
+        display: inline-flex;
+        align-items: center;
+        margin-top: 5px;
+        color: var(--accent);
         font-size: 11px;
+        font-weight: 600;
+        background: none;
+        border: none;
+        padding: 0;
+        cursor: pointer;
+        font-family: inherit;
+      }
+      .tl-report:hover {
+        text-decoration: underline;
+      }
+      .tl-report-body {
+        margin: 6px 0 0;
+      }
+      .tl-report-body pre,
+      .tl-report-body p,
+      .tl-report-body ul,
+      .tl-report-body ol {
+        font-size: 12.5px;
       }
       .commit-list {
         margin: 6px 0;
@@ -769,22 +875,29 @@
       .copy-popover {
         position: absolute;
         z-index: 100;
+        max-width: 90vw;
         background: var(--surface);
         border: 1px solid var(--border);
         border-radius: 8px;
         box-shadow: var(--shadow);
         padding: 8px;
       }
-      .copy-popover input {
+      .copy-popover textarea {
+        display: block;
         font-family: 'IBM Plex Mono', monospace;
         font-size: 12px;
-        width: 280px;
-        max-width: 60vw;
-        padding: 4px 6px;
+        width: min(360px, 80vw);
+        min-height: 2.6em;
+        max-height: 140px;
+        padding: 6px 8px;
         border: 1px solid var(--border);
         border-radius: 4px;
         background: var(--surface-2);
         color: var(--ink);
+        white-space: pre-wrap;
+        word-break: break-all;
+        overflow-y: auto;
+        resize: none;
       }
 
       @media (max-width: 700px) {
@@ -809,7 +922,8 @@
         <button type="button" class="stat" id="stat-stale" data-group="stale">0 stale</button>
         <span class="spacer"></span>
         <button type="button" class="freshness" id="freshness" aria-expanded="false">
-          refreshed —
+          <span class="freshness-text" id="freshness-text">refreshed —</span>
+          <span class="chevron" aria-hidden="true">⌄</span>
         </button>
         <button type="button" class="refresh-btn" id="refresh-btn">Refresh now</button>
       </header>
@@ -847,6 +961,7 @@
         </div>
         <div class="drawer-notice" id="drawer-notice" hidden></div>
         <div class="drawer-status" id="drawer-status"></div>
+        <div class="drawer-request" id="drawer-request"></div>
         <nav class="drawer-tabs" id="drawer-tabs" role="tablist"></nav>
         <div class="drawer-body" id="drawer-body"></div>
       </div>
@@ -889,10 +1004,11 @@
         merged: 6,
         verified: 6,
       };
-      const TABS = ['status', 'request', 'timeline', 'plan', 'scope', 'proof', 'pr', 'git'];
+      // Status header + original request are always-visible drawer content, not tabs —
+      // only these six remain tabs. Old '#flow/<id>/status' and '/request' deep links
+      // (pre-restructure) fall through to the default tab via parseHash's TABS check.
+      const TABS = ['timeline', 'plan', 'scope', 'proof', 'pr', 'git'];
       const TAB_LABEL = {
-        status: 'Status',
-        request: 'Request',
         timeline: 'Timeline',
         plan: 'Plan',
         scope: 'Scope',
@@ -933,12 +1049,23 @@
         return `${Math.floor(h / 24)}d`;
       }
 
-      function ageClass(ms, now) {
+      // Escalation is an axis orthogonal to grouping, but the low-priority Stale
+      // section (flows nothing else claims) shouldn't alarm-color the same as an
+      // actively failing/needed card — cap it at the muted "stale" treatment.
+      function ageClass(ms, now, group) {
         if (ms == null) return 'age-unknown';
+        if (group === 'stale') return 'age-stale';
         const diff = now - ms;
         if (diff >= 24 * 3600 * 1000) return 'age-red';
         if (diff >= 4 * 3600 * 1000) return 'age-amber';
         return 'age-grey';
+      }
+
+      // Age escalation must never be color-only — pair amber/red with a glyph too.
+      function ageGlyph(cls) {
+        if (cls === 'age-amber') return '⏱ ';
+        if (cls === 'age-red') return '⚠ ';
+        return '';
       }
 
       function fmtTime(v) {
@@ -1161,12 +1288,15 @@
         });
         html += `<i class="${terminal ? 'done' : ''}" title="merge complete / verified"></i>`;
         const nowName = idx >= 0 && idx < 6 ? SEGMENTS[idx] : (phase ?? 'unknown');
-        const nextName = idx >= 0 && idx < 5 ? SEGMENTS[idx + 1] : 'merge';
+        // idx 5 is the last active segment (ready-to-merge/"merge") — its next stage is
+        // verify, never a repeat of "merge" itself. idx 6 (merged/verified) is terminal
+        // and handled separately below.
+        const nextName = idx >= 0 && idx < 5 ? SEGMENTS[idx + 1] : idx === 5 ? 'verify' : null;
         const label = terminal
           ? `shipped (${phase})`
           : isFailing
-            ? `now: ${nowName} ✗ · next: ${nextName}`
-            : `now: ${nowName} · next: ${nextName}`;
+            ? `now: ${nowName} ✗ · next: ${nextName ?? '—'}`
+            : `now: ${nowName} · next: ${nextName ?? '—'}`;
         el.innerHTML = html + `<span class="pipe-label">${escapeHtml(label)}</span>`;
       }
 
@@ -1192,11 +1322,12 @@
       }
 
       function flashCopied(btn, originalLabel) {
-        btn.textContent = 'Copied ✓';
+        const labelEl = btn.querySelector('.copy-label') ?? btn;
+        labelEl.textContent = 'Copied ✓';
         btn.classList.add('copied');
         clearTimeout(btn._copyTimer);
         btn._copyTimer = setTimeout(() => {
-          btn.textContent = originalLabel;
+          labelEl.textContent = originalLabel;
           btn.classList.remove('copied');
         }, 1500);
       }
@@ -1205,12 +1336,12 @@
         closeCopyPopover();
         const pop = document.createElement('div');
         pop.className = 'copy-popover';
-        pop.innerHTML = '<input type="text" readonly />';
+        pop.innerHTML = '<textarea readonly></textarea>';
         document.body.appendChild(pop);
         const rect = btn.getBoundingClientRect();
         pop.style.top = `${window.scrollY + rect.bottom + 6}px`;
         pop.style.left = `${window.scrollX + rect.left}px`;
-        const input = pop.querySelector('input');
+        const input = pop.querySelector('textarea');
         input.value = cmd;
         input.focus();
         input.select();
@@ -1260,8 +1391,10 @@
       function copyBtn(text, cmd) {
         const b = document.createElement('button');
         b.type = 'button';
-        b.className = 'linklike copy-btn';
-        b.textContent = text;
+        b.className = 'copy-btn';
+        b.innerHTML =
+          '<span class="copy-icon" aria-hidden="true">⧉</span>' +
+          `<span class="copy-label">${escapeHtml(text)}</span>`;
         b.dataset.label = text;
         b.title = cmd;
         b.addEventListener('click', (e) => {
@@ -1339,8 +1472,9 @@
 
         const ageEl = el.querySelector('.age');
         const now = Date.now();
-        ageEl.textContent = fmtAge(flow.waitingSince, now);
-        ageEl.className = `age ${ageClass(flow.waitingSince, now)}`;
+        const cls = ageClass(flow.waitingSince, now, flow.group);
+        ageEl.textContent = ageGlyph(cls) + fmtAge(flow.waitingSince, now);
+        ageEl.className = `age ${cls}`;
 
         renderLinks(el.querySelector('.links'), flow);
       }
@@ -1449,7 +1583,13 @@
         }
         const expanded = isExpanded(group);
         const anyThin = !!grid.querySelector('.thin-row');
-        const limit = expanded ? total : anyThin ? Math.min(5, total) : computeColumns(grid);
+        // Collapse beyond one row: a thin row spans the full grid width (one item per
+        // row), a card row holds however many columns currently fit.
+        const limit = expanded
+          ? total
+          : anyThin
+            ? Math.min(1, total)
+            : Math.min(computeColumns(grid), total);
         Array.from(grid.children).forEach((el, i) => {
           el.classList.toggle('hidden-collapsed', i >= limit);
         });
@@ -1528,9 +1668,11 @@
         el.hidden = !empty;
         if (!empty) return;
         const roots = data.setup?.roots ?? [];
+        const repoCount = data.setup?.repoCount;
         el.innerHTML =
           `<p>Scanned ${roots.length} root${roots.length === 1 ? '' : 's'}` +
           (roots.length ? ` (${roots.map(escapeHtml).join(', ')})` : '') +
+          (repoCount != null ? ` · ${repoCount} repo${repoCount === 1 ? '' : 's'}` : '') +
           ` · 0 flows</p><button type="button" id="empty-edit-roots" class="linklike">edit scan roots</button>`;
         const editBtn = document.getElementById('empty-edit-roots');
         editBtn.addEventListener('click', () => {
@@ -1564,7 +1706,7 @@
       }
 
       /* ---------- drawer: hash routing ---------- */
-      let drawerState = { id: null, tab: 'status', lastPhase: null, lastGroup: null };
+      let drawerState = { id: null, tab: 'timeline', lastPhase: null, lastGroup: null };
       const drawerEl = document.getElementById('drawer');
       const drawerBody = document.getElementById('drawer-body');
       const docCache = new Map();
@@ -1573,13 +1715,14 @@
         const m = location.hash.match(/^#flow\/([^/]+)\/?([^/]*)$/);
         if (!m) return null;
         const id = decodeURIComponent(m[1]);
-        const tab = TABS.includes(m[2]) ? m[2] : 'status';
+        // Old '#flow/<id>/status' and '/request' hashes (pre-restructure) fall through here.
+        const tab = TABS.includes(m[2]) ? m[2] : 'timeline';
         return { id, tab };
       }
 
       function openFlow(id, tab) {
         const current = parseHash();
-        const useTab = tab ?? (current && current.id === id ? current.tab : 'status');
+        const useTab = tab ?? (current && current.id === id ? current.tab : 'timeline');
         const newHash = `#flow/${encodeURIComponent(id)}/${useTab}`;
         if (location.hash === newHash) onHashChange();
         else location.hash = newHash;
@@ -1612,8 +1755,10 @@
         const key = `${flow.id}:${name}:${doc.mtimeMs}`;
         if (docCache.has(key)) return docCache.get(key);
         try {
+          // Fetch by doc.rel (which carries the `.claude/ship/` prefix engine.docPath
+          // expects), not the bare display `name` — `name` is only for matching.
           const res = await api(
-            `/api/doc?flow=${encodeURIComponent(flow.id)}&file=${encodeURIComponent(name)}`,
+            `/api/doc?flow=${encodeURIComponent(flow.id)}&file=${encodeURIComponent(doc.rel ?? name)}`,
           );
           if (!res.ok) return null;
           const data = await res.json();
@@ -1624,9 +1769,16 @@
         }
       }
 
-      function renderStatusTab(flow) {
+      // Status header: current stage, needed action + links, last event + time. Always
+      // visible above the tabs (not a tab itself) per DESIGN.md's drawer layout.
+      function renderStatusBlock(flow) {
+        const chips = buildChips(flow);
+        let out =
+          `<div class="row">${chips.map((c) => `<span class="${c.cls}">${escapeHtml(c.text)}</span>`).join('')}</div>` +
+          `<div class="meta">${escapeHtml(metaLine(flow))}</div>`;
         if (flow.broken) {
           return (
+            out +
             `<div class="notice error">${escapeHtml(flow.statusLine)}</div>` +
             `<p class="muted">This run's state.json could not be parsed. Check the run at ` +
             `<code>${escapeHtml(flow.worktree ?? '(unknown worktree)')}</code>.</p>` +
@@ -1636,7 +1788,7 @@
         const phase = flow.state?.phase ?? flow.statusLine ?? '—';
         const actionLabel = flow.action ? (ACTION_LABEL[flow.action] ?? flow.action) : null;
         const last = flow.timeline?.length ? flow.timeline[flow.timeline.length - 1] : null;
-        let out = `<dl class="status-dl"><dt>Stage</dt><dd>${escapeHtml(phase)}</dd><dt>Status</dt><dd>${escapeHtml(flow.statusLine || '—')}</dd></dl>`;
+        out += `<dl class="status-dl"><dt>Stage</dt><dd>${escapeHtml(phase)}</dd><dt>Status</dt><dd>${escapeHtml(flow.statusLine || '—')}</dd></dl>`;
         if (actionLabel) out += `<p><strong>Needed:</strong> ${escapeHtml(actionLabel)}</p>`;
         if (last) {
           out += `<p class="muted">Last event: <strong>${escapeHtml(last.phase ?? 'note')}</strong> — ${escapeHtml(fmtTime(last.at))}${last.note ? ` — ${escapeHtml(last.note)}` : ''}</p>`;
@@ -1648,10 +1800,17 @@
         return out;
       }
 
-      function renderRequestTab(flow) {
+      // Original request, verbatim. Always visible above the tabs, alongside the
+      // status block, per DESIGN.md ("then the original request verbatim, then tabs").
+      function renderRequestBlock(flow) {
         const req = flow.state?.request;
-        if (!req) return '<p class="muted">No original request captured for this flow.</p>';
-        return `<pre class="request-text">${escapeHtml(req)}</pre>`;
+        if (!req) {
+          return '<p class="muted">No original request captured for this flow.</p>';
+        }
+        return (
+          '<div class="request-label">Original request</div>' +
+          `<pre class="request-text">${escapeHtml(req)}</pre>`
+        );
       }
 
       function renderTimelineTab(flow) {
@@ -1660,13 +1819,17 @@
           '<ol class="timeline">' +
           flow.timeline
             .map((t) => {
-              const report = flow.docs?.find((d) => d.rel === `reports/${t.phase}.md`);
+              // docs' rel now carries the `.claude/ship/` prefix (real runs) while
+              // `name` stays the bare display name in both fixture and real shapes —
+              // match on name, and let loadDocContent resolve rel for the fetch.
+              const report = flow.docs?.find((d) => d.name === `reports/${t.phase}.md`);
               return (
                 `<li><span class="tl-phase">${escapeHtml(t.phase ?? 'note')}</span>` +
                 `<span class="tl-time">${escapeHtml(fmtTime(t.at))}</span>` +
                 (t.note ? `<p class="tl-note">${escapeHtml(t.note)}</p>` : '') +
                 (report
-                  ? `<span class="tl-report">report: ${escapeHtml(report.name)}</span>`
+                  ? `<button type="button" class="tl-report" data-doc="${escapeHtml(report.name)}" aria-expanded="false">report: ${escapeHtml(report.name)} ▸</button>` +
+                    '<div class="tl-report-body" hidden></div>'
                   : '') +
                 `</li>`
               );
@@ -1674,6 +1837,45 @@
             .join('') +
           '</ol>'
         );
+      }
+
+      // Opens a timeline phase report inline, reusing the same markdown renderer the
+      // doc tabs (Plan/Scope/Proof) use.
+      function wireTimelineReports(container, flow) {
+        container.querySelectorAll('.tl-report').forEach((btn) => {
+          btn.addEventListener('click', async () => {
+            const body = btn.nextElementSibling;
+            const name = btn.dataset.doc;
+            const expanded = btn.getAttribute('aria-expanded') === 'true';
+            if (expanded) {
+              body.hidden = true;
+              btn.setAttribute('aria-expanded', 'false');
+              btn.textContent = `report: ${name} ▸`;
+              return;
+            }
+            btn.setAttribute('aria-expanded', 'true');
+            btn.textContent = `report: ${name} ▾`;
+            body.hidden = false;
+            if (!body.dataset.loaded) {
+              body.innerHTML = '<p class="muted">Loading…</p>';
+              const content = await loadDocContent(flow, name);
+              body.innerHTML =
+                content != null
+                  ? renderMd(content)
+                  : '<p class="muted">Report could not be loaded.</p>';
+              body.dataset.loaded = '1';
+              markOverflowingPres(body);
+            }
+          });
+        });
+      }
+
+      // LOW-3: mark <pre> blocks whose content actually overflows so the right-edge
+      // fade only shows when there's really more to scroll to.
+      function markOverflowingPres(container) {
+        container.querySelectorAll('pre').forEach((pre) => {
+          pre.classList.toggle('pre-overflow', pre.scrollWidth > pre.clientWidth + 1);
+        });
       }
 
       async function renderDocTab(flow, name, label) {
@@ -1733,12 +1935,6 @@
         const scrollTop = drawerBody.scrollTop;
         let html = '';
         switch (drawerState.tab) {
-          case 'status':
-            html = renderStatusTab(flow);
-            break;
-          case 'request':
-            html = renderRequestTab(flow);
-            break;
           case 'timeline':
             html = renderTimelineTab(flow);
             break;
@@ -1759,12 +1955,12 @@
             break;
         }
         drawerBody.innerHTML = html;
-        wireDrawerBodyActions(flow);
+        if (drawerState.tab === 'timeline') wireTimelineReports(drawerBody, flow);
+        markOverflowingPres(drawerBody);
         drawerBody.scrollTop = scrollTop;
       }
 
-      function wireDrawerBodyActions(flow) {
-        const box = drawerBody.querySelector('[data-drawer-actions]');
+      function wireDrawerActions(box, flow) {
         if (!box) return;
         if (flow.kind === 'ship') box.appendChild(copyBtn('Copy /ship resume', resumeCmd(flow)));
         if (flow.action === 'merge' && flow.pr?.number != null)
@@ -1802,16 +1998,17 @@
       function renderDrawerChrome(flow) {
         const titleEl = document.getElementById('drawer-title');
         const statusEl = document.getElementById('drawer-status');
+        const requestEl = document.getElementById('drawer-request');
         if (!flow) {
           titleEl.textContent = 'Flow';
           statusEl.innerHTML = '';
+          requestEl.innerHTML = '';
           return;
         }
         titleEl.textContent = flow.title;
-        const chips = buildChips(flow);
-        statusEl.innerHTML =
-          `<div class="row">${chips.map((c) => `<span class="${c.cls}">${escapeHtml(c.text)}</span>`).join('')}</div>` +
-          `<div class="meta">${escapeHtml(metaLine(flow))}</div>`;
+        statusEl.innerHTML = renderStatusBlock(flow);
+        wireDrawerActions(statusEl.querySelector('[data-drawer-actions]'), flow);
+        requestEl.innerHTML = renderRequestBlock(flow);
       }
 
       function showDrawerNotice(text) {
@@ -1876,7 +2073,7 @@
       }
 
       function updateFreshness() {
-        const el = document.getElementById('freshness');
+        const el = document.getElementById('freshness-text');
         if (lastPollFailed) {
           el.textContent = 'refresh failed';
           return;
@@ -1892,10 +2089,15 @@
       let setupTouched = false;
       function updateSetup(setup) {
         const setupEl = document.getElementById('setup');
-        const show = !!(setup && (setup.created || setup.missingRoots?.length));
+        const show = !!(
+          setup &&
+          (setup.created || setup.missingRoots?.length || setup.configError)
+        );
         if (!setupEl.dataset.manual) setupEl.hidden = !show;
         const banner = document.getElementById('setup-banner');
         const lines = [];
+        if (setup?.configError)
+          lines.push(`Config file could not be parsed (${setup.configError}) — using defaults.`);
         if (setup?.created)
           lines.push(
             'No config file found yet — using defaults. Save to create ~/.claude/shipyard.config.json.',
