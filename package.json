@@ -16,7 +16,7 @@
     "prepare": "husky || true"
   },
   "devDependencies": {
-    "@yaniv120892/dev-config": "github:yaniv120892/dev-config#v0.1.2",
+    "@yaniv120892/dev-config": "github:yaniv120892/dev-config#v0.1.3",
     "eslint": "^10.13.0",
     "husky": "^9.1.7",
     "lint-staged": "^17.6.0",
