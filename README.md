@@ -37,8 +37,9 @@ node bin/shipyard
 
 No `npm install` is required — shipyard is zero-dependency at runtime (the
 devDependencies — the shared `dev-config` lint and format tooling — are only
-needed for `npm run lint` / `npm run format` and the pre-commit hook). The first run creates `~/.claude/shipyard.config.json`
-with the defaults below and opens your browser to the board.
+needed for `npm run lint` / `npm run format` and the pre-commit hook). The
+first run creates `~/.claude/shipyard.config.json` with the defaults below and
+opens your browser to the board.
 
 To get a `shipyard` command on your `PATH` instead of typing `node
 bin/shipyard` every time:

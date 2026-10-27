@@ -13,7 +13,7 @@
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "check": "node --check server.js && node --check bin/shipyard && for f in lib/*.js lib/*/*.js; do [ -e \"$f\" ] || continue; node --check \"$f\" || exit 1; done",
-    "prepare": "husky || true"
+    "prepare": "if command -v husky >/dev/null; then husky; fi"
   },
   "devDependencies": {
     "@yaniv120892/dev-config": "github:yaniv120892/dev-config#v0.1.3",
