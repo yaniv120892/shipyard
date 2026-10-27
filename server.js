@@ -18,7 +18,9 @@ function hostAllowed(req, port) {
 
 async function readBody(req) {
   let data = '';
-  for await (const chunk of req) data += chunk;
+  for await (const chunk of req) {
+    data += chunk;
+  }
   return data ? JSON.parse(data) : {};
 }
 
@@ -27,7 +29,9 @@ export function createServer({ token, version, engine, config }) {
     const url = new URL(req.url, 'http://127.0.0.1');
     try {
       const port = server.address()?.port ?? config.port;
-      if (!hostAllowed(req, port)) return json(res, 403, { error: 'bad host' });
+      if (!hostAllowed(req, port)) {
+        return json(res, 403, { error: 'bad host' });
+      }
       if (req.method !== 'GET' && req.headers['x-shipyard-token'] !== token) {
         return json(res, 403, { error: 'missing or bad token' });
       }
@@ -54,13 +58,17 @@ export function createServer({ token, version, engine, config }) {
           url.searchParams.get('flow'),
           url.searchParams.get('file') ?? '',
         );
-        if (!abs) return json(res, 404, { error: 'not found' });
+        if (!abs) {
+          return json(res, 404, { error: 'not found' });
+        }
         return json(res, 200, { file: abs, content: fs.readFileSync(abs, 'utf8') });
       }
       if (req.method === 'POST' && url.pathname === '/api/open') {
         const body = await readBody(req);
         const abs = engine.openTarget(body.flow, body.file ?? '.');
-        if (!abs) return json(res, 404, { error: 'not found' });
+        if (!abs) {
+          return json(res, 404, { error: 'not found' });
+        }
         return json(res, 200, { opened: abs, ok: await engine.openInEditor(abs) });
       }
       if (req.method === 'POST' && url.pathname === '/api/refresh') {

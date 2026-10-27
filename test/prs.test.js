@@ -6,7 +6,9 @@ function stubExec(responses) {
   return async (cmd, args) => {
     const key = args.slice(0, 2).join(' ');
     const r = responses[key];
-    if (r instanceof Error) throw r;
+    if (r instanceof Error) {
+      throw r;
+    }
     return { stdout: typeof r === 'string' ? r : JSON.stringify(r) };
   };
 }

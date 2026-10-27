@@ -216,7 +216,9 @@ test('L2 — a permanently torn state.json over a cached read surfaces a degrade
   assert.equal(flow.degraded, undefined);
 
   fs.writeFileSync(path.join(ship, 'state.json'), '{"slug": "t", "pha'); // torn
-  for (let i = 0; i < 3; i++) await engine.fastTick();
+  for (let i = 0; i < 3; i++) {
+    await engine.fastTick();
+  }
 
   flow = engine.getSnapshot().flows.find((f) => f.kind === 'ship');
   assert.deepEqual(flow.degraded, [

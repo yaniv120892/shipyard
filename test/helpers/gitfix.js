@@ -17,7 +17,9 @@ export function makeRepo(area, name, { remote } = {}) {
   fs.writeFileSync(path.join(repo, 'README.md'), name);
   git('add', '.');
   git('commit', '-m', 'init');
-  if (remote) git('remote', 'add', 'origin', remote);
+  if (remote) {
+    git('remote', 'add', 'origin', remote);
+  }
   return { repo, git };
 }
 
