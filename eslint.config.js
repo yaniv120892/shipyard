@@ -1,11 +1,14 @@
-export default [
+import { defineConfig } from 'eslint/config';
+import node from '@yaniv120892/dev-config/eslint/node';
+
+export default defineConfig(
+  { ignores: ['docs/'] },
+  node,
+  { files: ['bin/shipyard'] },
   {
-    files: ['**/*.js', 'bin/shipyard'],
-    languageOptions: { ecmaVersion: 2023, sourceType: 'module' },
+    // Zero runtime dependencies: runtime code imports node: builtins and local files only.
+    files: ['server.js', 'bin/shipyard', 'lib/**/*.js', 'scripts/**/*.js'],
     rules: {
-      'no-unused-vars': ['error', { argsIgnorePattern: '^_' }],
-      'no-undef': 'off',
-      eqeqeq: ['error', 'always', { null: 'ignore' }],
       'no-restricted-imports': [
         'error',
         {
@@ -19,6 +22,4 @@ export default [
       ],
     },
   },
-  { files: ['test/**'], rules: { 'no-restricted-imports': 'off' } },
-  { ignores: ['node_modules/', 'docs/'] },
-];
+);
