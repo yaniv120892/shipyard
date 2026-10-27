@@ -5,12 +5,12 @@ import os from 'node:os';
 import path from 'node:path';
 import { snapshotRun, listArchived, resolveFates, prune } from '../lib/archive.js';
 
-function tmp() {
+function makeTempDir() {
   return fs.mkdtempSync(path.join(os.tmpdir(), 'shipyard-arch-'));
 }
 
 function makeShipDir() {
-  const ship = path.join(tmp(), '.claude', 'ship');
+  const ship = path.join(makeTempDir(), '.claude', 'ship');
   fs.mkdirSync(path.join(ship, 'reports'), { recursive: true });
   fs.writeFileSync(path.join(ship, 'state.json'), '{"phase":"qa","pr":5}');
   fs.writeFileSync(path.join(ship, 'plan.md'), '# plan');
@@ -28,7 +28,7 @@ const META = {
 };
 
 test('snapshotRun mirrors the ship dir and pins meta once', () => {
-  const history = tmp();
+  const history = makeTempDir();
   const ship = makeShipDir();
   snapshotRun({ shipDir: ship, runId: META.runId, meta: META }, history);
   const entry = listArchived(history)[0];
@@ -44,7 +44,7 @@ test('snapshotRun mirrors the ship dir and pins meta once', () => {
 });
 
 test('resolveFates queries gh once for vanished runs and persists the verdict', async () => {
-  const history = tmp();
+  const history = makeTempDir();
   snapshotRun({ shipDir: makeShipDir(), runId: META.runId, meta: META }, history);
   let calls = 0;
   const gh = {
@@ -60,7 +60,7 @@ test('resolveFates queries gh once for vanished runs and persists the verdict', 
 });
 
 test('resolveFates skips live runs', async () => {
-  const history = tmp();
+  const history = makeTempDir();
   snapshotRun({ shipDir: makeShipDir(), runId: META.runId, meta: META }, history);
   const gh = {
     prState: async () => {
@@ -72,7 +72,7 @@ test('resolveFates skips live runs', async () => {
 });
 
 test('prune enforces maxEntries by pinnedAt age', () => {
-  const history = tmp();
+  const history = makeTempDir();
   for (let i = 0; i < 3; i++) {
     const id = `run${i}`.padEnd(16, '0');
     snapshotRun({ shipDir: makeShipDir(), runId: id, meta: { ...META, runId: id } }, history);

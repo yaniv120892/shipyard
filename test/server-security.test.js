@@ -13,7 +13,7 @@ import { boot } from './server.test.js';
 function requestWithHost(url, host) {
   return new Promise((resolve, reject) => {
     const u = new URL(url);
-    const req = http.request(
+    const request = http.request(
       {
         hostname: u.hostname,
         port: u.port,
@@ -21,13 +21,13 @@ function requestWithHost(url, host) {
         method: 'GET',
         headers: { Host: host },
       },
-      (res) => {
-        res.resume();
-        res.on('end', () => resolve({ status: res.statusCode }));
+      (response) => {
+        response.resume();
+        response.on('end', () => resolve({ status: response.statusCode }));
       },
     );
-    req.on('error', reject);
-    req.end();
+    request.on('error', reject);
+    request.end();
   });
 }
 
@@ -47,8 +47,8 @@ function stubEngine() {
 
 test('Host header outside localhost is rejected on every route', async () => {
   const { base, close } = await boot({ engine: stubEngine() });
-  const res = await requestWithHost(`${base}/api/flows`, 'evil.example:4111');
-  assert.equal(res.status, 403);
+  const response = await requestWithHost(`${base}/api/flows`, 'evil.example:4111');
+  assert.equal(response.status, 403);
   await close();
 });
 

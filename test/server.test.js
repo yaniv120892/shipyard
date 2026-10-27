@@ -17,8 +17,8 @@ export async function boot(extra = {}) {
 
 test('GET /api/health reports name and version', async () => {
   const { base, close } = await boot();
-  const res = await fetch(`${base}/api/health`);
-  assert.equal(res.status, 200);
-  assert.deepEqual(await res.json(), { name: 'shipyard', version: '0.1.0' });
+  const response = await fetch(`${base}/api/health`);
+  assert.equal(response.status, 200);
+  assert.deepEqual(await response.json(), { name: 'shipyard', version: '0.1.0' });
   await close();
 });

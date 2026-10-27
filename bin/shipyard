@@ -11,15 +11,16 @@ const demo = args.includes('--demo');
 const portFlag = args.includes('--port') ? Number(args[args.indexOf('--port') + 1]) : null;
 const { config, created, missingRoots, configError } = loadConfig({});
 const port = portFlag ?? config.port;
-if (configError)
+if (configError) {
   console.log(`shipyard: config file could not be parsed (${configError}) — using defaults`);
+}
 
 async function existingInstance(port) {
   try {
-    const res = await fetch(`http://127.0.0.1:${port}/api/health`, {
+    const response = await fetch(`http://127.0.0.1:${port}/api/health`, {
       signal: AbortSignal.timeout(1000),
     });
-    const body = await res.json();
+    const body = await response.json();
     return body.name === 'shipyard';
   } catch {
     return false;
@@ -52,6 +53,10 @@ try {
 engine.start();
 const url = `http://127.0.0.1:${bound}`;
 console.log(`shipyard: ${url}`);
-if (demo) console.log('demo mode — showing fixture data, nothing on disk is scanned');
-if (created && !demo) console.log('first run — confirm scan roots in the setup panel');
+if (demo) {
+  console.log('demo mode — showing fixture data, nothing on disk is scanned');
+}
+if (created && !demo) {
+  console.log('first run — confirm scan roots in the setup panel');
+}
 openBrowser(url);

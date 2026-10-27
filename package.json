@@ -12,14 +12,20 @@
     "lint": "eslint .",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
-    "check": "node --check server.js && node --check bin/shipyard && for f in lib/*.js lib/*/*.js; do [ -e \"$f\" ] || continue; node --check \"$f\" || exit 1; done"
+    "check": "node --check server.js && node --check bin/shipyard && for f in lib/*.js lib/*/*.js; do [ -e \"$f\" ] || continue; node --check \"$f\" || exit 1; done",
+    "prepare": "if command -v husky >/dev/null; then husky; fi"
   },
   "devDependencies": {
-    "eslint": "^9",
-    "prettier": "^3"
+    "@yaniv120892/dev-config": "github:yaniv120892/dev-config#v0.1.4",
+    "eslint": "^10.13.0",
+    "husky": "^9.1.7",
+    "lint-staged": "^17.6.0",
+    "prettier": "^3.9.10",
+    "typescript": "~6.0.3"
   },
   "engines": {
     "node": ">=20"
   },
-  "license": "MIT"
+  "license": "MIT",
+  "prettier": "@yaniv120892/dev-config/prettier"
 }

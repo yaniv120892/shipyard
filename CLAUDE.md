@@ -4,7 +4,7 @@
 
 - `npm test` — run the test suite (`node --test`).
 - `npm run lint` — eslint over the repo.
-- `npm run format` — prettier, writes changes.
+- `npm run format` — prettier, writes changes; `npm run format:check` verifies.
 - `npm run check` — `node --check` syntax check on server.js, bin/shipyard, and lib/**/*.js.
 - `node bin/shipyard` — run the server directly.
 - `node scripts/demo.js` — demo mode; arrives in a later task, not yet present.
@@ -12,10 +12,14 @@
 ## Zero runtime dependencies
 
 No npm runtime dependencies. `lib/`, `server.js`, `bin/`, and `public/` may import
-only `node:` builtins and local relative files — no bare package imports. This is
-enforced by an eslint `no-restricted-imports` regex guard. `devDependencies` are
-limited to `eslint` and `prettier`; nothing else may be added without revisiting
-this constraint.
+only `node:` builtins and local relative files — no bare package imports. An eslint
+`no-restricted-imports` regex guard enforces this for every `.js` file and
+`bin/shipyard`, except `test/` and `eslint.config.js`; `public/index.html` is not
+linted, so check its scripts by hand. `devDependencies` are limited to the shared
+tooling: `@yaniv120892/dev-config` with its peers `eslint`, `prettier` and
+`typescript` (the shared lint config parses through typescript-eslint), plus
+`husky` and `lint-staged` for the pre-commit hook. Nothing else may be added
+without revisiting this constraint.
 
 ## Security invariants
 
