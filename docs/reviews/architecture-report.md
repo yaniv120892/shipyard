@@ -2,7 +2,7 @@
 
 Branch `task/18-uiux-fixes`, reviewed 2026-08-26. Read-only inspection of the full runtime
 surface (`lib/`, `server.js`, `bin/shipyard`, `public/index.html`), `docs/DESIGN.md`,
-`CLAUDE.md`, and both review reports. Gate question: **ready to extend, not over-engineered.**
+`AGENTS.md` (then `CLAUDE.md`), and both review reports. Gate question: **ready to extend, not over-engineered.**
 
 Severity counts: **0 high · 5 medium · 6 low.** `npm test` passes (0 failures).
 
@@ -263,7 +263,7 @@ deferred by the report ("no action now"); nothing changed.
   only path boundary (`docPath`, feeding both `/api/doc` and `/api/open`); every child
   process is `execFile` with argv arrays (`gitP`, gh client, `openInEditor`, `openBrowser`);
   token on all non-GET, Host allowlist on everything, bind 127.0.0.1 only,
-  `openCommand` never accepted from a request. Matches CLAUDE.md invariants exactly.
+  `openCommand` never accepted from a request. Matches AGENTS.md invariants exactly.
 - **Pattern consistency:** `{ok, reason}` fail-soft is uniform across gh/tracker; last-
   known-good caching is uniform (ship collector `FAIL_LIMIT` cache; `network.prsByRepo`/
   `tasks` retained on failure); the one deviation is `gitP` returning bare `null`, which is
@@ -350,7 +350,7 @@ already the interface — only per-forge selection and a `forge` field in archiv
 missing, and correctly so until GitLab is a real requirement — and new view modes touch
 only `public/index.html` because grouping is data, not layout. Boundaries hold everywhere
 inspected: one-way dependency flow, pure-observer collectors, a single composition point,
-and security helpers at every path/exec boundary exactly as CLAUDE.md demands. The
+and security helpers at every path/exec boundary exactly as AGENTS.md demands. The
 over-engineering audit found the opposite failure mode almost nowhere — the flagged items
 (dead `teams`/`projects`/`workspace` config, uncalled `issueUrl`, write-only pidfile,
 unread `pending`/`stateType`) are small accretions to delete, not architecture to unwind.
