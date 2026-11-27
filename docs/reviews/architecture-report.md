@@ -2,7 +2,7 @@
 
 Branch `task/18-uiux-fixes`, reviewed 2026-08-26. Read-only inspection of the full runtime
 surface (`lib/`, `server.js`, `bin/shipyard`, `public/index.html`), `docs/DESIGN.md`,
-`AGENTS.md`, and both review reports. Gate question: **ready to extend, not over-engineered.**
+`AGENTS.md` (then `CLAUDE.md`), and both review reports. Gate question: **ready to extend, not over-engineered.**
 
 Severity counts: **0 high · 5 medium · 6 low.** `npm test` passes (0 failures).
 
